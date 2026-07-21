@@ -290,6 +290,7 @@ async function loadCMS(){
     for(let off=0; off<200000; off+=SIZE){
       const params=new URLSearchParams({size:SIZE,offset:off});
       if(st) params.set('filter[STATE_CD]',st);
+      params.set('filter[PGM_TRMNTN_CD]','00');   // 00 = active; ~73% of the raw file is terminated labs
       const res=await fetch(`${base}?${params}`);
       if(!res.ok) throw new Error('CMS returned HTTP '+res.status);
       let arr=await res.json();
