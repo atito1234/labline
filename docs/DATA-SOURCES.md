@@ -158,15 +158,27 @@ public github.io site remains the free directory.
 (`http://localhost:11434`) and a model name (`ollama list`). LM Studio: enable its local
 server, use `http://localhost:1234/v1`.
 
-**Web research (optional).** With an Ollama web-search API key (free from `ollama.com` →
-Settings → Keys, pasted into AI settings, stored only in your browser), LabLine can search
-the web for company context and ground each call sheet in cited sources. "Research & Prep"
-runs this over your currently-filtered leads in a capped batch, sequentially, with a live
-progress panel and a Stop button. Note: search queries go through Ollama's cloud service, so
-that part isn't fully offline; if the browser can't reach it (CORS), the batch reports the
-failure and you can switch to a local search source. Without a key, prep still works but is
-role/strategy-only (no live company facts) — the model is instructed not to assert unverified
-specifics.
+**Web research (optional) — via the local proxy.** Browsers cannot call
+`ollama.com/api/web_search` directly: it sends no CORS headers, so an in-browser request fails
+with "Failed to fetch." LabLine therefore talks to a tiny proxy you run locally
+(`tools/ollama-search-proxy.py`, stdlib only). The proxy holds your Ollama API key in an
+environment variable — **the key never touches the browser** — forwards each search to Ollama,
+and returns it with CORS headers the page accepts. Setup:
+
+```
+# 1) get a key at ollama.com -> Settings -> Keys
+# 2) run the proxy (Windows PowerShell):
+$env:OLLAMA_API_KEY = "your-key"
+python tools/ollama-search-proxy.py
+# 3) LabLine -> AI settings: Enable web search, Search URL = http://localhost:8791/search,
+#    Search key = blank
+```
+
+"Research & Prep" then runs research over your currently-filtered leads in a capped batch,
+sequentially, with a live progress panel and a Stop button. Search queries reach Ollama's
+service through the proxy, so that part isn't fully offline; for a fully local alternative,
+point the Search URL at a self-hosted SearXNG instead. With web search off, prep still works
+but is role/strategy-only — the model is instructed not to assert unverified specifics.
 
 **Guardrails on research.** The prompt forces the model to ground every specific claim in the
 provided sources, cite them, and mark anything unverified as "not found." On people it is

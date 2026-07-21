@@ -429,9 +429,20 @@
         <div class="hint">The name as your runtime lists it (e.g. <code>ollama list</code>).</div>
       </div>
       <div class="fld">
-        <label>Web-search key (optional — enables research)</label>
-        <input id="llmWebKey" type="password" placeholder="Ollama API key (ollama.com → Settings → Keys)" autocomplete="off" />
-        <div class="hint">Free from <code>ollama.com</code>. Only used to search the web for company context. Stored in this browser, sent only to Ollama's search API. Leave blank to keep prep offline (no web).</div>
+        <label>Web research</label>
+        <label style="display:flex;align-items:center;gap:9px;font-family:var(--fb);font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);margin:0">
+          <input type="checkbox" id="llmSearchOn" style="width:auto" /> Enable web search for call prep
+        </label>
+      </div>
+      <div class="fld">
+        <label>Search URL</label>
+        <input id="llmSearchUrl" placeholder="http://localhost:8791/search" />
+        <div class="hint">Browsers can't call <code>ollama.com</code> directly (CORS). Run <code>tools/ollama-search-proxy.py</code> and point here: <code>http://localhost:8791/search</code>. The proxy holds your key — nothing sensitive in the browser.</div>
+      </div>
+      <div class="fld">
+        <label>Search key (optional)</label>
+        <input id="llmWebKey" type="password" placeholder="only if your Search URL needs a Bearer key" autocomplete="off" />
+        <div class="hint">Leave <b>blank</b> when using the proxy (safer — the key stays in the proxy, not this browser). Stored only in this browser if set.</div>
       </div>
       <div class="fld">
         <div class="hint"><b>One-time setup:</b> so the browser may talk to your local model, start Ollama allowing this origin — e.g. set <code>OLLAMA_ORIGINS=*</code> before launching <code>ollama serve</code>. This works when you run LabLine locally; the public site can't reach a local model.</div>
@@ -1001,6 +1012,8 @@ function openSettings(){
   document.getElementById('llmFormat').value=c.format||'ollama';
   document.getElementById('llmEndpoint').value=c.endpoint||'http://localhost:11434';
   document.getElementById('llmModel').value=c.model||'';
+  document.getElementById('llmSearchOn').checked=!!c.searchOn;
+  document.getElementById('llmSearchUrl').value=c.searchUrl||'http://localhost:8791/search';
   document.getElementById('llmWebKey').value=c.webKey||'';
   document.getElementById('settingsMsg').textContent='';
   openModal('mSettings');
@@ -1009,6 +1022,8 @@ function readSettingsForm(){
   return { format:document.getElementById('llmFormat').value,
     endpoint:document.getElementById('llmEndpoint').value.trim().replace(/\/$/,''),
     model:document.getElementById('llmModel').value.trim(),
+    searchOn:document.getElementById('llmSearchOn').checked,
+    searchUrl:document.getElementById('llmSearchUrl').value.trim(),
     webKey:document.getElementById('llmWebKey').value.trim() };
 }
 function saveSettings(){
@@ -1079,14 +1094,16 @@ function openPrep(idx){
   document.getElementById('prepMsg').textContent='';
   openModal('mPrep');
 }
-/* ---- web search (Ollama cloud search API, user's own key) ---- */
+/* ---- web search (via a browser-reachable Search URL — the local proxy, ideally) ---- */
+function webEnabled(c){ c=c||getLLM(); return !!(c.searchOn && c.searchUrl); }
 async function webSearch(query,maxResults){
   const c=getLLM();
-  if(!c.webKey) return [];                                   // no key -> offline prep, no web
-  const res=await fetchT('https://ollama.com/api/web_search',{method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.webKey},
+  if(!webEnabled(c)) return [];                              // off -> offline prep, no web
+  const headers={'Content-Type':'application/json'};
+  if(c.webKey) headers['Authorization']='Bearer '+c.webKey;  // proxy mode: leave key blank, proxy adds it
+  const res=await fetchT(c.searchUrl,{method:'POST',headers,
     body:JSON.stringify({query:query,max_results:maxResults||5})},20000);
-  if(res.status===401||res.status===403) throw new Error('web-search key rejected ('+res.status+')');
+  if(res.status===401||res.status===403) throw new Error('search rejected ('+res.status+') — check the key/URL');
   if(!res.ok) throw new Error('web search HTTP '+res.status);
   const j=await res.json();
   return (j.results||[]).map(r=>({title:r.title||'',url:r.url||'',content:(r.content||'').slice(0,1200)}));
@@ -1127,7 +1144,7 @@ function buildPrepMessages(l,companyText,contact,sources){
 async function draftForLead(l,companyText,contact,onState){
   let sources=[];
   const c=getLLM();
-  if(c.webKey){ if(onState)onState('searching'); sources=await webSearch(`${l.name} ${l.city} ${l.state} laboratory diagnostics biotech`,5); }
+  if(webEnabled(c)){ if(onState)onState('searching'); sources=await webSearch(`${l.name} ${l.city} ${l.state} laboratory diagnostics biotech`,5); }
   if(onState)onState('drafting');
   const text=await llmChat(buildPrepMessages(l,companyText,contact,sources));
   return {text,sources};
@@ -1217,8 +1234,8 @@ function openBatch(){
       warn.textContent='Large run: '+v+' companies, roughly '+Math.ceil(v*8/60)+'–'+Math.ceil(v*22/60)+' min and '+v+' searches of your quota.'; }
     else warn.hidden=true; };
   const c=getLLM(), note=document.getElementById('batchWebNote');
-  if(c.webKey){ note.className='batch-note'; note.textContent='Web research: ON. Guardrails force cited, professional-only facts — no personal dossiers, no invented people.'; }
-  else { note.className='batch-note warn'; note.textContent='No web-search key — sheets will be role & strategy only (no live company facts). Add a key in AI settings to enable research.'; }
+  if(webEnabled(c)){ note.className='batch-note'; note.textContent='Web research: ON. Guardrails force cited, professional-only facts — no personal dossiers, no invented people.'; }
+  else { note.className='batch-note warn'; note.textContent='Web search OFF — sheets will be role & strategy only (no live company facts). Enable it in AI settings (needs the local proxy).'; }
   document.getElementById('batchConfig').hidden=false;
   document.getElementById('batchProgress').hidden=true;
   document.getElementById('batchStartBtn').hidden=false; document.getElementById('batchStartBtn').disabled=!(c.endpoint&&c.model);
