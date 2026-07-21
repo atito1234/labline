@@ -277,6 +277,8 @@
   .batch-warn{margin-top:16px;font-size:13px;color:#f0c98a;background:rgba(181,129,31,.12);border:1px solid rgba(181,129,31,.35);border-radius:10px;padding:11px 14px;line-height:1.5}
   .batch-note{margin-top:14px;font-family:var(--fm);font-size:11.5px;color:#7d94a6;line-height:1.6}
   .batch-note.warn{color:#f0a878}
+  .batch-check{display:flex;align-items:flex-start;gap:9px;margin-top:18px;font-size:13px;color:#cddbe4;cursor:pointer;line-height:1.4}
+  .batch-check input{width:auto;margin-top:2px;accent-color:var(--fam);flex:0 0 auto}
 
   .ring-wrap{position:relative;width:120px;height:120px;margin:4px auto 20px}
   .ring{transform:rotate(-90deg)}
@@ -442,6 +444,7 @@
       <button class="dlbtn" id="dlCsv" onclick="exportPipeline()" disabled>Pipeline (CSV)<small>Status, contact &amp; notes per lead</small></button>
       <button class="dlbtn" id="dlMd" onclick="downloadCallSheets()" disabled>Call sheets (Markdown)<small>Company info, contacts &amp; AI scripts</small></button>
       <button class="dlbtn" id="dlJson" onclick="downloadBackup()" disabled>Full backup (JSON)<small>Everything, re-importable</small></button>
+      <button class="dlbtn" id="dlComm" onclick="downloadCommunity()" disabled>Community dataset (open)<small>Public facts + sources · no personal data</small></button>
     </div>
 
     <div class="rb-note">
@@ -583,6 +586,7 @@
           <input id="batchN" type="number" min="1" max="200" value="25" />
         </div>
       </div>
+      <label class="batch-check"><input type="checkbox" id="batchCommunity" /> Sanitized for sharing — company facts only, no names or personal data (builds the open community dataset)</label>
       <div id="batchWarn" class="batch-warn" hidden></div>
       <div class="batch-note" id="batchWebNote"></div>
     </div>
@@ -1248,12 +1252,31 @@ function buildPrepMessages(l,companyText,contact,sources){
     +"Write the call sheet, honoring the guardrails.";
   return [{role:'system',content:sys},{role:'user',content:usr}];
 }
-async function draftForLead(l,companyText,contact,onState,onDelta){
+/* sanitized, shareable, company-ONLY profile — no individuals, no personal/pitch content */
+function buildCommunityMessages(l,sources){
+  const grounded=Array.isArray(sources)&&sources.length;
+  const sys="You are writing an OPEN, SHAREABLE directory entry about a laboratory or biotech company for a public community dataset. "
+    +"Company-level facts ONLY.\n\nHARD RULES:\n"
+    +"- NEVER include the name, title, or any detail of any individual person — no staff, directors, or contacts. If a source names a person, ignore it.\n"
+    +"- No personal data of any kind. No candidate, resume, or sales-pitch content. This is NOT a call script.\n"
+    +"- Ground every specific claim ONLY in the WEB SOURCES; cite with [n]. If a fact isn't in the sources, omit it or write \"not found\". Never invent.\n\n"
+    +"Return concise markdown:\n1. Summary — one sentence on what this lab/company does\n"
+    +"2. Services / testing focus — bullets, cited\n3. Scope & signals — locations, recent FDA clearances, publicly-stated growth/hiring signals, cited\n"
+    +"4. Sources — the numbered URLs used\nFactual and neutral. If sources are thin, say so briefly.";
+  const src=grounded?sources.map((s,i)=>`[${i+1}] ${s.title} — ${s.url}\n${s.content}`).join('\n\n')
+    :'(no web sources — return only the public facility facts below and note that web info was unavailable)';
+  const usr="LABORATORY (public federal directory):\n"
+    +`- Name: ${l.name}\n- Location: ${l.city}, ${l.state} ${l.zip}\n- Certificate: ${l.cert||'unknown'}\n- Listed in: ${(l.sources||[]).join(', ')}\n\n`
+    +`WEB SOURCES:\n${src}\n\nWrite the public directory entry — company-level only, no individuals.`;
+  return [{role:'system',content:sys},{role:'user',content:usr}];
+}
+async function draftForLead(l,companyText,contact,onState,onDelta,community){
   let sources=[];
   const c=getLLM();
   if(webEnabled(c)){ if(onState)onState('searching'); sources=await webSearch(`${l.name} ${l.city} ${l.state} laboratory diagnostics biotech`,5); }
   if(onState)onState('drafting');
-  const text=await llmChat(buildPrepMessages(l,companyText,contact,sources),onDelta);
+  const msgs=community?buildCommunityMessages(l,sources):buildPrepMessages(l,companyText,contact,sources);
+  const text=await llmChat(msgs,onDelta);
   return {text,sources};
 }
 async function generatePrep(){
@@ -1296,6 +1319,7 @@ function updateDownloadState(){
   const anyPipe=hasPipeContent(), g=id=>document.getElementById(id);
   ['dlCsv','dlMd','btnExport'].forEach(i=>{ if(g(i)) g(i).disabled=!anyPipe; });
   if(g('dlJson')) g('dlJson').disabled=!(anyPipe||getResume()||LABS.length);
+  if(g('dlComm')) g('dlComm').disabled=!Object.values(PIPE).some(p=>p&&p.profile);
   if(g('btnBatch')) g('btnBatch').disabled=!LABS.length;
 }
 function download(name,text,type){
@@ -1323,6 +1347,21 @@ function downloadCallSheets(){
   }
   if(!n){ log('Nothing to export yet — set a status, add a contact, or generate a call sheet.','err'); return; }
   download('labline-call-sheets-'+stamp+'.md',md,'text/markdown;charset=utf-8');
+}
+function downloadCommunity(){
+  const byId=Object.fromEntries(LABS.map(l=>[l.id,l]));
+  const labs=[];
+  for(const [id,p] of Object.entries(PIPE)){
+    if(!p.profile) continue;
+    const l=byId[id]||{};
+    labs.push({ name:l.name||'', city:l.city||'', state:l.state||'', zip:l.zip||'', certificate:l.cert||'',
+      facility_phone:l.phone?fmtPhone(l.phone):'', external_id:l.extId||'', listed_in:l.sources||[],
+      profile:p.profile, profile_sources:p.profileSources||[], researched:p.profileAt||'' });
+  }
+  if(!labs.length){ log('No community profiles yet — run Research with “Sanitized for sharing” ticked.','err'); return; }
+  const meta={ dataset:'LabLine community lab profiles', count:labs.length, generated:new Date().toISOString().slice(0,10),
+    note:'Public-domain U.S. federal facility data plus AI-summarized public web info, company-level only. No personal data or individual names. Unverified — confirm before relying on any entry.' };
+  download('labline-community-dataset-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify({meta,labs},null,2),'application/json');
 }
 function downloadBackup(){
   const referenced=new Set(Object.keys(PIPE));
@@ -1420,7 +1459,8 @@ async function startBatch(){
   if(!c.endpoint||!c.model){ const m=document.getElementById('batchMsg'); m.className='batch-msg err'; m.textContent='Connect your local model first (AI settings).'; return; }
   const n=Math.max(1,Math.min(200,+document.getElementById('batchN').value||25));
   const pool=(BATCH.pool||[]).slice(0,n); if(!pool.length) return;
-  Object.assign(BATCH,{pool2:pool,running:true,stop:false,done:0,drafted:0,thin:0,failed:0,skipped:0,skip:new Set(),t0:Date.now()});
+  Object.assign(BATCH,{pool2:pool,running:true,stop:false,done:0,drafted:0,thin:0,failed:0,skipped:0,skip:new Set(),
+    community:document.getElementById('batchCommunity').checked,t0:Date.now()});
   document.getElementById('batchConfig').hidden=true;
   document.getElementById('batchProgress').hidden=false;
   document.getElementById('batchStartBtn').hidden=true;
@@ -1437,9 +1477,10 @@ async function startBatch(){
     if(BATCH.skip.has(i)){ setRow(i,'skipped','skipped'); BATCH.skipped++; BATCH.done++; updRing(); continue; }
     const l=pool[i];
     try{
-      const r=await draftForLead(l,'','',st=>setRow(i,st,st));
+      const r=await draftForLead(l,'','',st=>setRow(i,st,st),undefined,BATCH.community);
       const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''};
-      p.prep=r.text||''; p.prepAt=new Date().toISOString().slice(0,10);
+      if(BATCH.community){ p.profile=r.text||''; p.profileSources=r.sources.map(s=>s.url); p.profileAt=new Date().toISOString().slice(0,10); }
+      else { p.prep=r.text||''; p.prepAt=new Date().toISOString().slice(0,10); }
       if(r.sources.length){ BATCH.drafted++; setRow(i,'done','done · '+r.sources.length+' src'); }
       else { BATCH.thin++; setRow(i,'thin','no web'); }
       netFails=0;
