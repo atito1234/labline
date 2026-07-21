@@ -347,8 +347,44 @@
   .act-dot.followup{background:var(--rox)} .act-dot.no{background:#9aa8b2} .act-dot.note{background:var(--amber)}
   .act-body{flex:1;min-width:0;color:var(--ink-2)}
   .act-body b{color:var(--ink);font-weight:600}
-  .act-detail{color:var(--muted);font-style:italic}
+  .act-loc{font-family:var(--fm);font-size:11.5px;color:var(--muted-2)}
+  .act-detail{color:var(--muted);font-style:italic;margin-left:6px}
   .act-empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px}
+
+  /* ---------- table / board view (monday-style) ---------- */
+  .viewtog{display:inline-flex;border:1px solid var(--line-2);border-radius:20px;overflow:hidden;margin-left:6px}
+  .vw{border:0;background:#fff;color:var(--muted);font-size:12.5px;padding:7px 13px;cursor:pointer}
+  .vw.on{background:var(--fam);color:#04211f;font-weight:600}
+  .tblwrap{border:1px solid var(--line);border-radius:var(--radius);overflow:auto;background:var(--card)}
+  table.board{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;min-width:980px}
+  table.board thead th{position:sticky;top:0;z-index:2;background:var(--paper-2);text-align:left;font-family:var(--fm);
+    font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.board td{padding:9px 12px;border-bottom:1px solid var(--paper-2);vertical-align:middle}
+  table.board tbody tr:hover{background:#f8fbfc}
+  table.board tbody tr.sel{background:var(--fam-glow)}
+  table.board tbody tr.sel:hover{background:var(--fam-glow)}
+  .board .tsel{width:34px;text-align:center}
+  .board .tsel .card-sel{position:static;width:19px;height:19px;font-size:11px}
+  .board .tname{font-weight:600;color:var(--ink)}
+  .board .tid{font-family:var(--fm);font-size:10.5px;color:var(--muted-2)}
+  .board .tbadges{margin-top:3px;display:flex;gap:4px;flex-wrap:wrap}
+  .board .tloc{color:var(--ink-2);min-width:130px}
+  .board .taddr{font-size:11.5px;color:var(--muted-2)}
+  .board .tel-lnk{font-family:var(--fm);color:var(--fam-deep);font-weight:600;text-decoration:none;white-space:nowrap}
+  .board .tel-lnk:hover{text-decoration:underline}
+  .board .tlook{font-size:12px;color:var(--cy5);text-decoration:none}
+  .board .tprio{font-family:var(--fd);font-weight:700;font-size:14px;padding:3px 9px;border-radius:8px;color:#fff}
+  .board .prio-strong{background:var(--fam-deep)} .board .prio-good{background:var(--cy5)} .board .prio-basic{background:#6b7d8a}
+  .board select.status{min-width:120px}
+  .board .tcontact{width:100%;min-width:120px;border:1px solid transparent;border-radius:7px;padding:6px 8px;font-size:13px;background:transparent}
+  .board .tcontact:hover{border-color:var(--line)} .board .tcontact:focus{outline:none;border-color:var(--fam);background:#fff;box-shadow:0 0 0 2px var(--fam-glow)}
+  .board .tnote{width:100%;min-width:180px;min-height:34px;border:1px solid transparent;border-radius:7px;padding:6px 8px;font-size:13px;background:transparent;resize:vertical;line-height:1.4;font-family:var(--fb)}
+  .board .tnote:hover{border-color:var(--line)} .board .tnote:focus{outline:none;border-color:var(--fam);background:#fff;box-shadow:0 0 0 2px var(--fam-glow)}
+  .board .tact{font-family:var(--fm);font-size:11px;color:var(--muted-2);white-space:nowrap}
+  .board .tmuted{color:var(--line-2)}
+  .board .tcall-wrap{display:flex;flex-direction:column;gap:4px}
+  .board .btn-callm{font-size:11px;font-weight:600;padding:4px 10px;border-radius:14px;background:var(--fam);color:#04211f;text-decoration:none;text-align:center;border:1px solid var(--fam)}
+  .board .btn-callm:hover{background:var(--fam-deep);color:#fff}
 </style>
 </head>
 <body>
@@ -438,6 +474,7 @@
       <label class="phone-toggle"><input type="checkbox" id="onlyPhone" onchange="render()" /> Has phone</label>
       <label class="phone-toggle"><input type="checkbox" id="onlyHC" onchange="render()" /> High-complexity</label>
       <button class="resetlink" onclick="resetFilters()">Reset</button>
+      <div class="viewtog"><button class="vw on" id="vwCards" onclick="setView('cards')">▤ Cards</button><button class="vw" id="vwTable" onclick="setView('table')">▦ Table</button></div>
     </div>
 
     <div class="selbar" id="selBar" hidden>
@@ -691,6 +728,7 @@ const CMS_ENDPOINTS=[
 let LABS=[], SHOWN=[], SEEN=new Map();   // dedupe key -> record, so merges stay O(1)
 let SEL=new Set();                       // ids the user hand-picked for research
 let PREPJOBS=new Set();                   // lead ids whose call sheet is generating (possibly in background)
+let VIEW='cards';                        // 'cards' | 'table' (monday-style board)
 let PIPE=loadPipe();
 
 /* ---------------- storage ---------------- */
@@ -996,8 +1034,39 @@ function render(){
   if(mc) mc.textContent=rows.length.toLocaleString()+' of '+LABS.length.toLocaleString()+' organizations shown';
   refreshCounts();
   const more=rows.length>MAX_ROWS?`<div class="moremsg">Showing the first ${MAX_ROWS} of ${rows.length.toLocaleString()} matches — narrow the filters to reach the rest.</div>`:'';
-  res.innerHTML=`<div class="cards">${SHOWN.map((l,i)=>rowHTML(l,i)).join('')}</div>${more}`;
+  const body=VIEW==='table'?tableHTML(SHOWN):`<div class="cards">${SHOWN.map((l,i)=>rowHTML(l,i)).join('')}</div>`;
+  res.innerHTML=body+more;
 }
+function setView(v){ VIEW=v;
+  const c=document.getElementById('vwCards'), t=document.getElementById('vwTable');
+  if(c) c.classList.toggle('on',v==='cards'); if(t) t.classList.toggle('on',v==='table'); render(); }
+function tableHTML(rows){
+  return `<div class="tblwrap"><table class="board"><thead><tr>
+    <th class="tsel"></th><th>Organisation</th><th>Location</th><th>Phone</th><th>Priority</th><th>Status</th><th>Contact / spoke with</th><th>Notes &amp; outcome</th><th>Last activity</th>
+  </tr></thead><tbody>${rows.map((l,i)=>trHTML(l,i)).join('')}</tbody></table></div>`;
+}
+function trHTML(l,i){
+  const p=PIPE[l.id]||{status:'new',note:''};
+  const score=leadScore(l),tier=leadTier(score),on=SEL.has(l.id);
+  const tel=l.phone
+    ? `<div class="tcall-wrap"><a class="tel-lnk" href="tel:+1${l.phone}" onclick="dialLog(${i})">${fmtPhone(l.phone)}</a><a class="btn-callm" href="tel:+1${l.phone}" onclick="dialLog(${i})">☎ Call</a></div>`
+    : `<a class="tlook" href="https://www.google.com/search?q=${encodeURIComponent(l.name+' '+l.city+' '+l.state+' phone')}" target="_blank" rel="noopener">look up ↗</a>`;
+  return `<tr class="${on?'sel':''}">
+    <td class="tsel"><button class="card-sel${on?' on':''}" onclick="toggleSel(event,${i})" title="Select">${on?'✓':''}</button></td>
+    <td><div class="tname">${esc(l.name)}</div><div class="tid">${esc(l.extId||'')}</div><div class="tbadges">${l.sources.map(s=>`<span class="sbadge">${esc(s)}</span>`).join('')}${l.cert?`<span class="certpill ${certClass(l.cert)}">${esc(l.cert)}</span>`:''}</div></td>
+    <td class="tloc">${esc(l.city)}${l.city&&l.state?', ':''}${esc(l.state)} ${esc(l.zip)}<div class="taddr">${esc(l.addr||'')}</div></td>
+    <td>${tel}</td>
+    <td><span class="tprio prio-${tier}">${score}</span></td>
+    <td><select class="status st-${p.status}" onchange="setStat(${i},this.value,this)">${Object.entries(STATUS_LABELS).map(([v,t])=>`<option value="${v}"${p.status===v?' selected':''}>${t}</option>`).join('')}</select></td>
+    <td><input class="tcontact" value="${esc(p.contact||'')}" placeholder="name / title" onchange="setContact(${i},this.value)" /></td>
+    <td><textarea class="tnote" placeholder="notes, callback #, outcome…" onchange="setNote(${i},this.value)">${esc(p.note)}</textarea></td>
+    <td class="tact">${lastActivity(l.id)}</td>
+  </tr>`;
+}
+function relTime(d){ const s=Math.floor((Date.now()-d.getTime())/1000);
+  if(s<60)return 'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago';
+  const days=Math.floor(s/86400); if(days<7)return days+'d ago'; return d.toLocaleDateString([],{month:'short',day:'numeric'}); }
+function lastActivity(id){ for(let k=ACT.length-1;k>=0;k--){ if(ACT[k].id===id) return esc(relTime(new Date(ACT[k].t)))+'<br>'+esc(ACT[k].action); } return '<span class="tmuted">—</span>'; }
 function rowHTML(l,idx){
   const p=PIPE[l.id]||{status:'new',note:''};
   const score=leadScore(l), tier=leadTier(score), rdy=readiness(l);
@@ -1048,9 +1117,12 @@ function refreshCounts(){
 }
 function setStat(i,v,el){ const l=SHOWN[i]; if(!l)return;
   PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].status=v;
-  el.className='status st-'+v; savePipe(); refreshCounts(); logAct(l.id,l.name,'Status → '+(STATUS_LABELS[v]||v)); }
+  el.className='status st-'+v; savePipe(); refreshCounts(); logAct(l,'Status → '+(STATUS_LABELS[v]||v)); }
 function setNote(i,v){ const l=SHOWN[i]; if(!l)return;
-  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].note=v; savePipe(); logAct(l.id,l.name,'Note updated',(v||'').slice(0,60)); }
+  const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; const changed=p.note!==v; p.note=v; savePipe();
+  if(changed) logAct(l,'Note updated',v||''); }
+function setContact(i,v){ const l=SHOWN[i]; if(!l)return;
+  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].contact=v; savePipe(); }
 
 /* ---------------- pipeline import / export ---------------- */
 function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
@@ -1426,8 +1498,8 @@ function toggleSel(e,idx){ e.stopPropagation(); setSel(idx,!SEL.has((SHOWN[idx]|
 function setSel(idx,on){
   const l=SHOWN[idx]; if(!l) return;
   if(on) SEL.add(l.id); else SEL.delete(l.id);
-  const card=document.querySelectorAll('.cards .jcard')[idx];
-  if(card){ card.classList.toggle('sel',on); const s=card.querySelector('.card-sel'); if(s){ s.classList.toggle('on',on); s.textContent=on?'✓':''; } }
+  const el=VIEW==='table'?document.querySelectorAll('.board tbody tr')[idx]:document.querySelectorAll('.cards .jcard')[idx];
+  if(el){ el.classList.toggle('sel',on); const s=el.querySelector('.card-sel'); if(s){ s.classList.toggle('on',on); s.textContent=on?'✓':''; } }
   updateSelBar();
 }
 function selectAllShown(){ SHOWN.forEach(l=>SEL.add(l.id)); render(); updateSelBar(); }
@@ -1441,13 +1513,14 @@ function updateSelBar(){
 function loadActivity(){ try{ return JSON.parse(localStorage.getItem('labline_activity'))||[]; }catch(e){ return []; } }
 function saveActivity(){ try{ localStorage.setItem('labline_activity',JSON.stringify(ACT)); }catch(e){} }
 let ACT=loadActivity();
-function logAct(id,name,action,detail){
-  ACT.push({t:new Date().toISOString(),id:id||'',name:name||'',action:action,detail:detail||''});
-  if(ACT.length>3000) ACT=ACT.slice(-3000);
+function logAct(l,action,detail){ l=l||{};
+  ACT.push({t:new Date().toISOString(),id:l.id||'',name:l.name||'',city:l.city||'',state:l.state||'',
+    phone:l.phone||'',cert:l.cert||'',action:action,detail:detail||''});
+  if(ACT.length>4000) ACT=ACT.slice(-4000);
   saveActivity(); updateActBadge();
   if(document.getElementById('mActivity').classList.contains('open')) renderActivity();
 }
-function dialLog(idx){ const l=SHOWN[idx]; if(l) logAct(l.id,l.name,'Dialed',l.phone?fmtPhone(l.phone):''); }
+function dialLog(idx){ const l=SHOWN[idx]; if(l) logAct(l,'Dialed',l.phone?fmtPhone(l.phone):''); }
 function actClass(a){ if(a==='Dialed')return 'dial'; if(a==='Note updated')return 'note';
   if(/Interview/.test(a))return 'interview'; if(/Follow up/.test(a))return 'followup'; if(/Not a fit/.test(a))return 'no'; return ''; }
 function updateActBadge(){ const b=document.getElementById('btnActivity'); if(!b)return;
@@ -1462,26 +1535,27 @@ function renderActivity(){
   const f=(document.querySelector('input[name=actf]:checked')||{}).value||'all';
   const today=new Date().toDateString();
   const todays=ACT.filter(a=>new Date(a.t).toDateString()===today);
-  const dialToday=todays.filter(a=>a.action==='Dialed').length;
+  const calledIds=new Set(todays.filter(a=>a.action==='Dialed'||a.action==='Status → Called').map(a=>a.id));
   const chip=(n,l)=>`<div class="act-chip"><b>${n}</b><span>${l}</span></div>`;
-  document.getElementById('actSummary').innerHTML=chip(todays.length,'actions today')+chip(dialToday,'calls today')+chip(ACT.length,'total logged');
+  document.getElementById('actSummary').innerHTML=chip(todays.length,'actions today')+chip(calledIds.size,'labs called today')+chip(ACT.length,'total logged');
   let list=ACT.slice().reverse();
-  if(f==='dial') list=list.filter(a=>a.action==='Dialed');
+  if(f==='dial') list=list.filter(a=>a.action==='Dialed'||a.action==='Status → Called');
   if(!list.length){ tl.innerHTML='<div class="act-empty">No activity yet. As you click Call, set a status, or add a note, it shows up here automatically.</div>'; return; }
   let html='',lastDay='';
   for(const a of list){
     const d=new Date(a.t), day=d.toDateString();
     if(day!==lastDay){ html+='<div class="act-day">'+esc(dayLabel(d))+'</div>'; lastDay=day; }
+    const loc=a.city?`<span class="act-loc">${esc(a.city)}${a.state?', '+esc(a.state):''}${a.phone?' · '+esc(fmtPhone(cleanPhone(a.phone))||a.phone):''}</span>`:'';
     html+='<div class="act-row"><span class="act-time">'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'
       +'<span class="act-dot '+actClass(a.action)+'"></span>'
-      +'<span class="act-body"><b>'+esc(a.name||'—')+'</b> — '+esc(a.action)+(a.detail?' <span class="act-detail">“'+esc(a.detail)+'”</span>':'')+'</span></div>';
+      +'<span class="act-body"><b>'+esc(a.name||'—')+'</b> '+loc+' — '+esc(a.action)+(a.detail?'<span class="act-detail">“'+esc(a.detail)+'”</span>':'')+'</span></div>';
   }
   tl.innerHTML=html;
 }
 function downloadActivityLog(){
   if(!ACT.length){ const m=document.getElementById('actMsg'); m.className='m-msg err'; m.textContent='Nothing logged yet.'; return; }
-  const lines=[['timestamp','organisation','action','detail'].join(',')];
-  ACT.forEach(a=>lines.push([a.t,a.name,a.action,a.detail].map(csvCell).join(',')));
+  const lines=[['timestamp','organisation','city','state','phone','category','action','detail'].join(',')];
+  ACT.forEach(a=>lines.push([a.t,a.name,a.city||'',a.state||'',a.phone?(fmtPhone(cleanPhone(a.phone))||a.phone):'',a.cert||'',a.action,a.detail].map(csvCell).join(',')));
   download('labline-activity-'+new Date().toISOString().slice(0,10)+'.csv',lines.join('\n'),'text/csv;charset=utf-8');
 }
 function clearActivity(){ ACT=[]; saveActivity(); renderActivity(); updateActBadge();
