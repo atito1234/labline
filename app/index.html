@@ -411,6 +411,25 @@
   .bc-contact:focus{outline:none;border-color:var(--fam);box-shadow:0 0 0 3px var(--fam-glow)}
   .bc-note{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13.5px;min-height:44px;resize:vertical;line-height:1.45;font-family:var(--fb);background:#fff}
   .bc-note:focus{outline:none;border-color:var(--fam);box-shadow:0 0 0 3px var(--fam-glow)}
+
+  /* ---------- editable priority + next-step (shared across views) ---------- */
+  .prio-sel{appearance:none;border:1px solid;border-radius:8px;padding:4px 22px 4px 10px;font-family:var(--fd);font-weight:700;font-size:12.5px;cursor:pointer;
+    background-image:linear-gradient(45deg,transparent 50%,rgba(255,255,255,.7) 50%),linear-gradient(135deg,rgba(255,255,255,.7) 50%,transparent 50%);
+    background-position:calc(100% - 12px) calc(50% - 2px),calc(100% - 7px) calc(50% - 2px);background-size:5px 5px;background-repeat:no-repeat}
+  .prio-sel.lv-high{background-color:var(--fam-deep);border-color:var(--fam-deep);color:#fff}
+  .prio-sel.lv-med{background-color:var(--cy5);border-color:var(--cy5);color:#fff}
+  .prio-sel.lv-low{background-color:#eef1f3;border-color:var(--line-2);color:#5a6c7a;
+    background-image:linear-gradient(45deg,transparent 50%,#8598a6 50%),linear-gradient(135deg,#8598a6 50%,transparent 50%)}
+  .prio-sel:focus{outline:none;box-shadow:0 0 0 3px var(--fam-glow)}
+  .next-in{width:100%;min-width:130px;border:1px solid transparent;border-radius:7px;padding:6px 8px;font-size:13px;background:transparent;font-family:var(--fb)}
+  .next-in:hover{border-color:var(--line)}
+  .next-in:focus{outline:none;border-color:var(--fam);background:#fff;box-shadow:0 0 0 2px var(--fam-glow)}
+  .jscore .prio-sel{margin:6px 0 2px}
+  .jnext{display:flex;align-items:center;gap:8px;margin-top:9px}
+  .jnext-lab{font-family:var(--fm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);flex:0 0 auto}
+  .jnext .next-in{border:1px solid var(--line)}
+  .bc-next{display:flex;align-items:center;gap:8px}
+  .bc-next .next-in{border:1px solid var(--line);background:#fff}
 </style>
 </head>
 <body>
@@ -512,6 +531,19 @@
         <button class="selbtn acc" onclick="openBatch()">✦ Research selected →</button>
       </div>
     </div>
+
+    <datalist id="nextOpts">
+      <option value="Call back tomorrow"></option>
+      <option value="Call back next week"></option>
+      <option value="Left voicemail — follow up"></option>
+      <option value="Look online / check careers page"></option>
+      <option value="Apply on their website"></option>
+      <option value="Email my resume"></option>
+      <option value="Ask for the hiring manager"></option>
+      <option value="Send a follow-up email"></option>
+      <option value="Waiting to hear back"></option>
+      <option value="Not a fit — close"></option>
+    </datalist>
 
     <div id="results"></div>
   </main>
@@ -1077,7 +1109,7 @@ function setView(v){ VIEW=v;
 const BOARD_ORDER=['followup','interview','called','new','no'];
 function renderBoard(){
   const res=document.getElementById('results'), mc=document.getElementById('mcount');
-  const ids=Object.keys(PIPE).filter(id=>{ const p=PIPE[id]; return p&&((p.status&&p.status!=='new')||p.note||p.contact||p.prep); });
+  const ids=Object.keys(PIPE).filter(id=>{ const p=PIPE[id]; return p&&((p.status&&p.status!=='new')||p.note||p.contact||p.prep||p.next); });
   if(mc) mc.textContent=ids.length+' labs on your board';
   const n=id=>document.getElementById(id);
   if(LABS.length){ const rows=currentFilter(); n('sLoaded').textContent=LABS.length.toLocaleString(); n('sShown').textContent=rows.length.toLocaleString(); n('sPhone').textContent=rows.filter(r=>r.phone).length.toLocaleString(); }
@@ -1093,7 +1125,7 @@ function renderBoardGroups(){
   const q=(document.getElementById('q').value||'').trim().toLowerCase();
   const groups={}; BOARD_ORDER.forEach(s=>groups[s]=[]);
   for(const [id,p] of Object.entries(PIPE)){
-    if(!((p.status&&p.status!=='new')||p.note||p.contact||p.prep)) continue;
+    if(!((p.status&&p.status!=='new')||p.note||p.contact||p.prep||p.next)) continue;
     const l=leadOf(id);
     if(q && !((l.name+' '+(l.city||'')+' '+(p.contact||'')+' '+(p.note||'')).toLowerCase().includes(q))) continue;
     const s=p.status||'new'; (groups[s]||(groups[s]=[])).push({id,p,l});
@@ -1116,17 +1148,19 @@ function bcard(id,p,l){
     <div class="bc-top"><div class="bc-name">${esc(l.name||id)}</div>${la?`<span class="bc-when">${esc(la)}</span>`:''}</div>
     <div class="bc-loc">${esc(l.city||'')}${l.city&&l.state?', ':''}${esc(l.state||'')} ${esc(l.zip||'')}${l.cert?` · ${esc(l.cert)}`:''}</div>
     <div class="bc-row">${tel}
+      ${prioSelectHTML('bPrio(&quot;'+escAttr(id)+'&quot;,this.value,this)',prioLevel(id,l))}
       <select class="status st-${p.status}" onchange="bStat(&quot;${escAttr(id)}&quot;,this.value)">
         ${Object.entries(STATUS_LABELS).map(([v,t])=>`<option value="${v}"${p.status===v?' selected':''}>${t}</option>`).join('')}
       </select></div>
     <input class="bc-contact" value="${esc(p.contact||'')}" placeholder="Contact / who you spoke to" onchange="bContact(&quot;${escAttr(id)}&quot;,this.value)" />
     <textarea class="bc-note" placeholder="Notes, callback #, outcome…" onchange="bNote(&quot;${escAttr(id)}&quot;,this.value)">${esc(p.note||'')}</textarea>
+    <div class="bc-next"><span class="jnext-lab">Next</span>${nextInputHTML('bNext(&quot;'+escAttr(id)+'&quot;,this.value)',p.next)}</div>
   </div>`;
 }
 function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function tableHTML(rows){
   return `<div class="tblwrap"><table class="board"><thead><tr>
-    <th class="tsel"></th><th>Organisation</th><th>Location</th><th>Phone</th><th>Priority</th><th>Status</th><th>Contact / spoke with</th><th>Notes &amp; outcome</th><th>Last activity</th>
+    <th class="tsel"></th><th>Organisation</th><th>Location</th><th>Phone</th><th>Priority</th><th>Status</th><th>Contact / spoke with</th><th>Notes &amp; outcome</th><th>Next step</th><th>Last activity</th>
   </tr></thead><tbody>${rows.map((l,i)=>trHTML(l,i)).join('')}</tbody></table></div>`;
 }
 function trHTML(l,i){
@@ -1140,10 +1174,11 @@ function trHTML(l,i){
     <td><div class="tname">${esc(l.name)}</div><div class="tid">${esc(l.extId||'')}</div><div class="tbadges">${l.sources.map(s=>`<span class="sbadge">${esc(s)}</span>`).join('')}${l.cert?`<span class="certpill ${certClass(l.cert)}">${esc(l.cert)}</span>`:''}</div></td>
     <td class="tloc">${esc(l.city)}${l.city&&l.state?', ':''}${esc(l.state)} ${esc(l.zip)}<div class="taddr">${esc(l.addr||'')}</div></td>
     <td>${tel}</td>
-    <td><span class="tprio prio-${tier}">${score}</span></td>
+    <td>${prioSelectHTML('setPrio('+i+',this.value,this)',prioLevel(l.id,l))}</td>
     <td><select class="status st-${p.status}" onchange="setStat(${i},this.value,this)">${Object.entries(STATUS_LABELS).map(([v,t])=>`<option value="${v}"${p.status===v?' selected':''}>${t}</option>`).join('')}</select></td>
     <td><input class="tcontact" value="${esc(p.contact||'')}" placeholder="name / title" onchange="setContact(${i},this.value)" /></td>
     <td><textarea class="tnote" placeholder="notes, callback #, outcome…" onchange="setNote(${i},this.value)">${esc(p.note)}</textarea></td>
+    <td>${nextInputHTML('setNext('+i+',this.value)',p.next)}</td>
     <td class="tact">${lastActivity(l.id)}</td>
   </tr>`;
 }
@@ -1153,7 +1188,7 @@ function relTime(d){ const s=Math.floor((Date.now()-d.getTime())/1000);
 function lastActivity(id){ for(let k=ACT.length-1;k>=0;k--){ if(ACT[k].id===id) return esc(relTime(new Date(ACT[k].t)))+'<br>'+esc(ACT[k].action); } return '<span class="tmuted">—</span>'; }
 function rowHTML(l,idx){
   const p=PIPE[l.id]||{status:'new',note:''};
-  const score=leadScore(l), tier=leadTier(score), rdy=readiness(l);
+  const score=leadScore(l), tier=leadTier(score), rdy=readiness(l), level=prioLevel(l.id,l);
   const reasons=[]; const cl=(l.cert||'').toLowerCase();
   if(l.phone) reasons.push('Has phone');
   if(cl.includes('compliance')||cl.includes('accredit')) reasons.push('High-complexity');
@@ -1182,11 +1217,12 @@ function rowHTML(l,idx){
         <button class="btn-prep${p.prep?' has':''}" type="button" onclick="openPrep(${idx})">⚡ ${PREPJOBS.has(l.id)?'Prepping…':(p.prep?'Call sheet':'Prep')}</button>
         <button class="btn-note" type="button" onclick="toggleNote(this)">✎ Note</button>
       </div>
-      <div class="jnote"${p.note?'':' hidden'}><textarea class="note" placeholder="Who you spoke to, next step…" onchange="setNote(${idx},this.value)">${esc(p.note)}</textarea></div>
+      <div class="jnote"${p.note?'':' hidden'}><textarea class="note" placeholder="Who you spoke to, outcome…" onchange="setNote(${idx},this.value)">${esc(p.note)}</textarea></div>
+      <div class="jnext"><span class="jnext-lab">Next</span>${nextInputHTML('setNext('+idx+',this.value)',p.next)}</div>
     </div>
-    <aside class="jscore tier-${tier}" title="Call Priority — a prioritization heuristic, not an official rating">
+    <aside class="jscore tier-${prioTier(level)}" title="Priority — editable; defaults from reachability + test complexity">
       <div class="score-pct">${score}<small>%</small></div>
-      <div class="score-label">${leadLabel(score)}</div>
+      ${prioSelectHTML('setPrio('+idx+',this.value,this)',level)}
       <div class="score-tag">${esc(tag)}</div>
       <div class="ready-pill ${rdy>=70?'r-ready':'r-need'}">${rdy>=70?'✓ Ready to call':'Prep needed'}</div>
     </aside>
@@ -1219,17 +1255,34 @@ function bNote(id,v){ const p=PIPE[id]; if(!p)return; const ch=p.note!==v; p.not
 function bContact(id,v){ const p=PIPE[id]; if(!p)return; p.contact=v; savePipe(); }
 function bDial(id){ const l=leadOf(id); logAct(l,'Dialed',l.phone?fmtPhone(l.phone):''); }
 
+/* ---- editable priority (High/Medium/Low, defaults from the auto score) ---- */
+function prioLevelAuto(l){ const t=leadTier(leadScore(l)); return t==='strong'?'high':t==='good'?'med':'low'; }
+function prioLevel(id,l){ const p=PIPE[id]; if(p&&(p.priority==='high'||p.priority==='med'||p.priority==='low')) return p.priority; return prioLevelAuto(l||leadOf(id)); }
+function prioLabel(v){ return v==='high'?'High':v==='med'?'Medium':'Low'; }
+function prioTier(v){ return v==='high'?'strong':v==='med'?'good':'basic'; }
+function prioSelectHTML(handler,level){ return `<select class="prio-sel lv-${level}" onchange="${handler}" onclick="event.stopPropagation()">`
+  +['high','med','low'].map(v=>`<option value="${v}"${v===level?' selected':''}>${prioLabel(v)}</option>`).join('')+'</select>'; }
+function setPrio(i,v,el){ const l=SHOWN[i]; if(!l)return; touch(l).priority=v; savePipe(); if(el) el.className='prio-sel lv-'+v; logAct(l,'Priority → '+prioLabel(v)); }
+function bPrio(id,v,el){ const p=PIPE[id]; if(!p)return; p.priority=v; savePipe(); if(el) el.className='prio-sel lv-'+v; logAct(leadOf(id),'Priority → '+prioLabel(v)); }
+
+/* ---- next-step: a suggestion list you can also type into freely ---- */
+const NEXT_OPTS=['Call back tomorrow','Call back next week','Left voicemail — follow up','Look online / check careers page',
+  'Apply on their website','Email my resume','Ask for the hiring manager','Send a follow-up email','Waiting to hear back','Not a fit — close'];
+function nextInputHTML(handler,val){ return `<input class="next-in" list="nextOpts" value="${esc(val||'')}" placeholder="pick or type a next step…" onchange="${handler}" onclick="event.stopPropagation()" />`; }
+function setNext(i,v){ const l=SHOWN[i]; if(!l)return; const p=touch(l); const ch=p.next!==v; p.next=v; savePipe(); if(ch&&v) logAct(l,'Next: '+v); }
+function bNext(id,v){ const p=PIPE[id]; if(!p)return; const ch=p.next!==v; p.next=v; savePipe(); if(ch&&v) logAct(leadOf(id),'Next: '+v); }
+
 /* ---------------- pipeline import / export ---------------- */
 function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function exportPipeline(){
   const byId=Object.fromEntries(LABS.map(l=>[l.id,l]));
-  const lines=[['record_id','organisation','external_id','address','city','state','zip','phone','category','sources','status','contact','has_call_sheet','notes'].join(',')];
+  const lines=[['record_id','organisation','external_id','address','city','state','zip','phone','category','sources','priority','status','contact','next_step','has_call_sheet','notes'].join(',')];
   for(const [id,p] of Object.entries(PIPE)){
-    if(p.status==='new'&&!p.note&&!p.contact&&!p.prep) continue;
-    const l=byId[id]||{};
+    if(p.status==='new'&&!p.note&&!p.contact&&!p.prep&&!p.next) continue;
+    const l=byId[id]||p.lab||{};
     lines.push([id,l.name||'',l.extId||'',l.addr||'',l.city||'',l.state||'',l.zip||'',
       l.phone?fmtPhone(l.phone):'',l.cert||'',(l.sources||[]).join(' / '),
-      STATUS_LABELS[p.status]||p.status,p.contact||'',p.prep?'yes':'',p.note||''].map(csvCell).join(','));
+      prioLabel(prioLevel(id,l)),STATUS_LABELS[p.status]||p.status,p.contact||'',p.next||'',p.prep?'yes':'',p.note||''].map(csvCell).join(','));
   }
   const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');
@@ -1528,7 +1581,7 @@ function savePrep(){
 function msg(id,text,kind){ const el=document.getElementById(id); el.textContent=text; el.className='m-msg'+(kind?' '+kind:''); }
 
 /* ---- downloads ---- */
-function hasPipeContent(){ return Object.values(PIPE).some(p=>p&&((p.status&&p.status!=='new')||p.note||p.prep||p.contact)); }
+function hasPipeContent(){ return Object.values(PIPE).some(p=>p&&((p.status&&p.status!=='new')||p.note||p.prep||p.contact||p.next)); }
 function updateDownloadState(){
   const anyPipe=hasPipeContent(), g=id=>document.getElementById(id);
   ['dlCsv','dlMd','btnExport'].forEach(i=>{ if(g(i)) g(i).disabled=!anyPipe; });
