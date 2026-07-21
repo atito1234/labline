@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Antonio J. Tito, Ph.D. — Molecular Diagnostics &amp; Regulatory Science</title>
+<meta name="description" content="Ph.D. molecular geneticist and regulatory/compliance director. Molecular diagnostics, CLIA/CAP/IVDR compliance, and translational research. Houston, TX. Bilingual EN/ES." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0a1826;        /* deep clinical slate-navy */
+    --ink-2:#22384c;
+    --paper:#fbfcfd;      /* near-white clinical */
+    --paper-2:#f2f6f9;
+    --line:#dbe4ea;
+    --muted:#5a6c7a;
+    /* fluorescence-channel accents (grounded in qPCR: FAM/HEX/ROX/Cy5) */
+    --fam:#12b3a6;        /* FAM cyan-green — primary accent */
+    --fam-deep:#0a7d74;
+    --rox:#e2683c;        /* ROX warm — secondary highlight */
+    --cy5:#3b5bdb;        /* Cy5 indigo */
+    --radius:14px;
+    --maxw:1120px;
+    --font-display:"Sora",system-ui,sans-serif;
+    --font-body:"Inter",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--font-body);font-size:16px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.1;margin:0}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+  .mono{font-family:var(--font-mono);letter-spacing:.02em}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--fam-deep)}
+
+  /* ---------- NAV ---------- */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(251,252,253,.82);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{font-family:var(--font-mono);font-size:14px;font-weight:500;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--fam);box-shadow:0 0 0 4px rgba(18,179,166,.16)}
+  .nav-links{display:flex;align-items:center;gap:26px}
+  .nav-links a{font-size:14px;color:var(--muted);transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  .lang{font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);border-radius:20px;overflow:hidden;display:inline-flex}
+  .lang button{border:0;background:transparent;padding:6px 12px;cursor:pointer;color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;letter-spacing:.05em}
+  .lang button.on{background:var(--ink);color:#fff}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;
+    padding:10px 18px;border-radius:30px;border:1px solid var(--ink);transition:.2s;cursor:pointer;font-family:var(--font-body)}
+  .btn.solid{background:var(--ink);color:#fff}
+  .btn.solid:hover{background:var(--ink-2)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{background:var(--paper-2)}
+  .btn.accent{background:var(--fam);border-color:var(--fam);color:#04211f}
+  .btn.accent:hover{background:var(--fam-deep);border-color:var(--fam-deep);color:#fff}
+  .nav .btn{padding:8px 16px}
+  .menu-toggle{display:none;background:none;border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:76px 0 56px;position:relative;overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+  .hero h1{font-size:clamp(34px,5vw,58px);font-weight:700;letter-spacing:-.02em;margin:18px 0 20px}
+  .hero h1 .amp{color:var(--fam-deep);position:relative;white-space:nowrap}
+  .hero p.lead{font-size:19px;color:var(--ink-2);max-width:44ch;margin:0 0 30px}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:12px}
+  .hero-meta{margin-top:30px;display:flex;flex-wrap:wrap;gap:22px;font-family:var(--font-mono);font-size:12.5px;color:var(--muted)}
+  .hero-meta span{display:inline-flex;align-items:center;gap:7px}
+  .hero-meta i{width:6px;height:6px;border-radius:50%;background:var(--fam)}
+  .curve-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px 22px 16px;
+    box-shadow:0 24px 60px -30px rgba(10,24,38,.28)}
+  .curve-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .curve-head .t{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;color:var(--muted)}
+  .curve-head .r{font-family:var(--font-mono);font-size:11px;color:var(--fam-deep);border:1px solid var(--line);padding:3px 9px;border-radius:20px}
+  .curve-cap{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:74px 0;border-top:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:38px;flex-wrap:wrap}
+  .sec-head h2{font-size:clamp(24px,3.4vw,34px);letter-spacing:-.01em}
+  .sec-head .num{font-family:var(--font-mono);font-size:13px;color:var(--fam-deep)}
+  .sec-sub{color:var(--muted);max-width:60ch;margin:-22px 0 34px;font-size:16px}
+
+  /* value strip */
+  .value-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .vcard{border:1px solid var(--line);border-radius:var(--radius);padding:26px;background:#fff}
+  .vcard .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+    background:var(--paper-2);color:var(--fam-deep);margin-bottom:16px;font-family:var(--font-mono);font-size:16px;font-weight:600}
+  .vcard h3{font-size:18px;margin-bottom:8px}
+  .vcard p{margin:0;color:var(--muted);font-size:15px}
+
+  /* roadmap */
+  .road{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .rcol{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff}
+  .rcol .rhead{padding:16px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+  .rcol .rhead .badge{width:9px;height:9px;border-radius:50%}
+  .rcol.done .rhead{color:var(--fam-deep)} .rcol.done .badge{background:var(--fam)}
+  .rcol.now .rhead{color:#b5561f} .rcol.now .badge{background:var(--rox)}
+  .rcol.next .rhead{color:#2f45a8} .rcol.next .badge{background:var(--cy5)}
+  .rcol ul{list-style:none;margin:0;padding:8px 0}
+  .rcol li{padding:12px 20px;font-size:14.5px;color:var(--ink-2);border-bottom:1px solid var(--paper-2);line-height:1.5}
+  .rcol li:last-child{border-bottom:0}
+  .rcol li b{font-weight:600;color:var(--ink)}
+  .road-note{margin-top:20px;font-size:13.5px;color:var(--muted);border-left:3px solid var(--fam);padding:2px 0 2px 16px}
+
+  /* experience */
+  .exp{display:grid;gap:0}
+  .job{display:grid;grid-template-columns:210px 1fr;gap:28px;padding:30px 0;border-bottom:1px solid var(--line)}
+  .job:last-child{border-bottom:0}
+  .job .when{font-family:var(--font-mono);font-size:12.5px;color:var(--muted)}
+  .job .when .yr{color:var(--fam-deep);font-weight:500;display:block;font-size:13px;margin-bottom:4px}
+  .job h3{font-size:20px;margin-bottom:3px}
+  .job .org{color:var(--ink-2);font-size:15px;font-weight:500;margin-bottom:12px}
+  .job ul{margin:0;padding-left:18px;color:var(--muted);font-size:15px}
+  .job ul li{margin-bottom:7px}
+
+  /* publications */
+  .pubs{columns:2;column-gap:40px}
+  .pub{break-inside:avoid;padding:14px 0;border-bottom:1px solid var(--paper-2);font-size:14px;color:var(--ink-2);line-height:1.5}
+  .pub .j{font-family:var(--font-mono);font-size:11.5px;color:var(--fam-deep);display:block;margin-top:4px}
+  .pub .yr{color:var(--muted)}
+
+  /* capabilities */
+  .caps{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  .cap{border:1px solid var(--line);border-radius:var(--radius);padding:24px;background:#fff}
+  .cap h3{font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .cap h3 .k{font-family:var(--font-mono);font-size:12px;color:var(--fam-deep)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:12.5px;font-family:var(--font-mono);background:var(--paper-2);color:var(--ink-2);padding:5px 11px;border-radius:20px;border:1px solid var(--line)}
+
+  /* contact */
+  .contact{background:var(--ink);color:#eef4f8;border-top:0}
+  .contact .wrap{padding-top:78px;padding-bottom:78px}
+  .contact .eyebrow{color:var(--fam)}
+  .contact h2{color:#fff;font-size:clamp(28px,4vw,44px);margin:16px 0 14px;letter-spacing:-.01em}
+  .contact p.big{color:#a9bccb;font-size:18px;max-width:52ch;margin:0 0 34px}
+  .clines{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:760px;margin-bottom:34px}
+  .cline{display:flex;align-items:center;gap:14px;border:1px solid #24384a;border-radius:var(--radius);padding:16px 20px;transition:.2s;background:#0e2233}
+  .cline:hover{border-color:var(--fam);background:#0f2a3c}
+  .cline .lab{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7f97a8;display:block;margin-bottom:2px}
+  .cline .val{font-size:16px;color:#fff;font-weight:500;word-break:break-word}
+  .cline .ic{width:40px;height:40px;flex:0 0 40px;border-radius:11px;background:#12b3a61a;color:var(--fam);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:600}
+  .contact-cta{display:flex;flex-wrap:wrap;gap:14px}
+  .btn.big{padding:14px 26px;font-size:15px}
+  .btn.fam-solid{background:var(--fam);border-color:var(--fam);color:#04211f}
+  .btn.fam-solid:hover{background:#0ecabb}
+  .btn.outline-l{background:transparent;border-color:#3a5468;color:#eef4f8}
+  .btn.outline-l:hover{border-color:var(--fam);color:#fff}
+
+  footer{background:var(--ink);color:#5f7688;padding:26px 0;border-top:1px solid #1b3244;font-family:var(--font-mono);font-size:12px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  [data-es]{display:none}
+  html[lang="es"] [data-en]{display:none}
+  html[lang="es"] [data-es]{display:inline}
+  html[lang="es"] li[data-es],html[lang="es"] p[data-es],html[lang="es"] span.block[data-es]{display:block}
+
+  @media (max-width:900px){
+    .hero-grid,.value-grid,.road,.caps,.clines{grid-template-columns:1fr}
+    .pubs{columns:1}
+    .job{grid-template-columns:1fr;gap:10px}
+    .nav-links{display:none}
+    .menu-toggle{display:inline-flex}
+    .curve-card{order:-1}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .amp-path{stroke-dashoffset:0!important}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="#top" class="brand"><span class="dot"></span> A. J. TITO · Ph.D.</a>
+    <nav class="nav-links">
+      <a href="#roadmap"><span data-en>Roadmap</span><span data-es>Ruta</span></a>
+      <a href="#experience"><span data-en>Experience</span><span data-es>Experiencia</span></a>
+      <a href="#research"><span data-en>Research</span><span data-es>Investigación</span></a>
+      <a href="#capabilities"><span data-en>Capabilities</span><span data-es>Competencias</span></a>
+      <div class="lang" role="group" aria-label="Language">
+        <button id="en" class="on" onclick="setLang('en')">EN</button>
+        <button id="es" onclick="setLang('es')">ES</button>
+      </div>
+      <a href="#contact" class="btn solid"><span data-en>Contact</span><span data-es>Contacto</span></a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle language" onclick="toggleLang()"><span id="mtoggle" class="mono">ES</span></button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="hero" style="border-top:0">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow"><span data-en>Ph.D. · Human &amp; Molecular Genetics · Houston, TX</span><span data-es>Ph.D. · Genética Humana y Molecular · Houston, TX</span></p>
+      <h1>
+        <span data-en>From the pipette to the <span class="amp">audit.</span></span>
+        <span data-es>De la pipeta a la <span class="amp">auditoría.</span></span>
+      </h1>
+      <p class="lead">
+        <span data-en>Molecular geneticist and regulatory director. I build diagnostic programs that pass the science <em>and</em> the inspection — bench, bioinformatics, and compliance under one roof.</span>
+        <span data-es>Genetista molecular y director regulatorio. Construyo programas de diagnóstico que aprueban la ciencia <em>y</em> la inspección — laboratorio, bioinformática y cumplimiento bajo un mismo techo.</span>
+      </p>
+      <div class="hero-cta">
+        <a href="tel:+17139419555" class="btn accent"><span class="mono">☎</span> <span data-en>Call 713-941-9555</span><span data-es>Llamar 713-941-9555</span></a>
+        <a href="mailto:antonio.j.tito@gmail.com" class="btn ghost"><span data-en>Email me</span><span data-es>Escríbeme</span></a>
+      </div>
+      <div class="hero-meta">
+        <span><i></i><span data-en>10+ peer-reviewed publications</span><span data-es>10+ publicaciones revisadas por pares</span></span>
+        <span><i></i>FDA QMSR · CLIA · CAP · IVDR</span>
+        <span><i></i><span data-en>Bilingual EN / ES</span><span data-es>Bilingüe EN / ES</span></span>
+      </div>
+    </div>
+
+    <!-- SIGNATURE: qPCR amplification curve -->
+    <div class="curve-card">
+      <div class="curve-head">
+        <span class="t" data-en>Amplification — career trajectory</span><span class="t" data-es>Amplificación — trayectoria</span>
+        <span class="r">FAM · 465–510 nm</span>
+      </div>
+      <svg viewBox="0 0 400 250" role="img" aria-labelledby="curveTitle" style="width:100%;height:auto;display:block">
+        <title id="curveTitle">A qPCR amplification curve rising past a threshold line, with career milestones marked as data points.</title>
+        <!-- grid -->
+        <g stroke="#e7eef3" stroke-width="1">
+          <line x1="40" y1="30" x2="40" y2="215"/><line x1="40" y1="215" x2="385" y2="215"/>
+          <line x1="40" y1="170" x2="385" y2="170"/><line x1="40" y1="120" x2="385" y2="120"/><line x1="40" y1="70" x2="385" y2="70"/>
+        </g>
+        <!-- axis labels -->
+        <text x="8" y="35" font-family="IBM Plex Mono" font-size="9" fill="#8aa0ae">ΔRn</text>
+        <text x="352" y="228" font-family="IBM Plex Mono" font-size="9" fill="#8aa0ae">cycles</text>
+        <!-- threshold -->
+        <line x1="40" y1="120" x2="385" y2="120" stroke="#e2683c" stroke-width="1.3" stroke-dasharray="5 4"/>
+        <text x="300" y="114" font-family="IBM Plex Mono" font-size="9" fill="#b5561f" data-en>Ct · CLIA director</text>
+        <text x="300" y="114" font-family="IBM Plex Mono" font-size="9" fill="#b5561f" data-es>Ct · director CLIA</text>
+        <!-- curve -->
+        <path class="amp-path" d="M40,206 C110,205 150,203 185,196 C215,190 232,168 250,132 C263,104 272,78 288,64 C308,48 345,44 385,42"
+          fill="none" stroke="#12b3a6" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="620" stroke-dashoffset="620"/>
+        <!-- milestone dots -->
+        <g>
+          <circle cx="120" cy="204" r="4" fill="#12b3a6"/><title>B.S. Biotechnology</title>
+          <circle cx="200" cy="193" r="4" fill="#12b3a6"/><title>Ph.D. Molecular Genetics</title>
+          <circle cx="252" cy="128" r="5" fill="#e2683c" stroke="#fff" stroke-width="1.5"/><title>Regulatory / compliance leadership</title>
+          <circle cx="330" cy="47" r="4" fill="#3b5bdb"/><title>Board certification + CLIA director</title>
+        </g>
+      </svg>
+      <p class="curve-cap">
+        <span data-en>Every marker is a real milestone — degree, publications, regulatory leadership. The dashed line is the goal crossing next: high-complexity CLIA laboratory director.</span>
+        <span data-es>Cada marcador es un hito real — título, publicaciones, liderazgo regulatorio. La línea punteada es la meta por cruzar: director de laboratorio CLIA de alta complejidad.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE -->
+<section id="value">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">01</span><h2><span data-en>Three things I do that rarely live in one person</span><span data-es>Tres cosas que rara vez viven en una sola persona</span></h2></div>
+    <div class="value-grid">
+      <div class="vcard">
+        <div class="ic">01</div>
+        <h3><span data-en>Run the bench</span><span data-es>Domino el laboratorio</span></h3>
+        <p><span data-en>qPCR, CRISPR-Cas9, RNA-seq, confocal and high-content imaging — with in vivo disease models and the experimental design to back them.</span><span data-es>qPCR, CRISPR-Cas9, RNA-seq, confocal e imagen de alto contenido — con modelos de enfermedad in vivo y el diseño experimental que los respalda.</span></p>
+      </div>
+      <div class="vcard">
+        <div class="ic">02</div>
+        <h3><span data-en>Pass the inspection</span><span data-es>Apruebo la inspección</span></h3>
+        <p><span data-en>Multi-framework gap analyses and remediation roadmaps across FDA 820 QMSR, CLIA, CAP, EU IVDR/MDR, ISO, and COFEPRIS.</span><span data-es>Análisis de brechas multi-marco y hojas de ruta de remediación en FDA 820 QMSR, CLIA, CAP, EU IVDR/MDR, ISO y COFEPRIS.</span></p>
+      </div>
+      <div class="vcard">
+        <div class="ic">03</div>
+        <h3><span data-en>Bridge two worlds</span><span data-es>Conecto dos mundos</span></h3>
+        <p><span data-en>Bilingual (EN/ES) scientist who translates complex science for regulators, clinicians, investors, and underrepresented patient communities alike.</span><span data-es>Científico bilingüe (EN/ES) que traduce ciencia compleja para reguladores, clínicos, inversionistas y comunidades de pacientes subrepresentadas.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">02</span><h2><span data-en>The roadmap to CLIA laboratory director</span><span data-es>La ruta a director de laboratorio CLIA</span></h2></div>
+    <p class="sec-sub"><span data-en>Where I am, and the exact regulatory path ahead. Under 42 CFR §493.1443, a Ph.D. directing a high-complexity lab needs an HHS-approved board certification plus documented high-complexity testing experience. Here is that path, made explicit.</span><span data-es>Dónde estoy y la ruta regulatoria exacta que sigue. Bajo 42 CFR §493.1443, un Ph.D. que dirige un laboratorio de alta complejidad requiere certificación de un board aprobado por HHS más experiencia documentada en pruebas de alta complejidad. Aquí está esa ruta, explícita.</span></p>
+    <div class="road">
+      <div class="rcol done">
+        <div class="rhead"><span class="badge"></span><span data-en>Completed</span><span data-es>Completado</span></div>
+        <ul>
+          <li><b>Ph.D.</b> <span data-en>Human &amp; Molecular Genetics — MD Anderson UTHealth GSBS</span><span data-es>Genética Humana y Molecular — MD Anderson UTHealth GSBS</span></li>
+          <li><span data-en><b>10+ publications</b> in Nature Cell Biology, PLoS Genetics, JoVE</span><span data-es><b>10+ publicaciones</b> en Nature Cell Biology, PLoS Genetics, JoVE</span></li>
+          <li><b>Good Clinical Practice</b> <span data-en>certified (HHS, 2021)</span><span data-es>certificado (HHS, 2021)</span></li>
+          <li><span data-en>Directed <b>compliance programs</b> across FDA QMSR, CLIA, CAP, IVDR</span><span data-es>Dirigí <b>programas de cumplimiento</b> en FDA QMSR, CLIA, CAP, IVDR</span></li>
+        </ul>
+      </div>
+      <div class="rcol now">
+        <div class="rhead"><span class="badge"></span><span data-en>In progress</span><span data-es>En proceso</span></div>
+        <ul>
+          <li><span data-en>Documenting <b>2 years directing/supervising</b> high-complexity testing (§493.1443 requirement)</span><span data-es>Documentando <b>2 años dirigiendo/supervisando</b> pruebas de alta complejidad (requisito §493.1443)</span></li>
+          <li><span data-en>Continuing education in <b>laboratory-director responsibilities</b> (§493.1445)</span><span data-es>Educación continua en <b>responsabilidades de director de laboratorio</b> (§493.1445)</span></li>
+          <li><span data-en>Building a <b>diagnostic-lab track record</b> in molecular / genomic testing</span><span data-es>Construyendo <b>trayectoria en laboratorio diagnóstico</b> en pruebas moleculares / genómicas</span></li>
+        </ul>
+      </div>
+      <div class="rcol next">
+        <div class="rhead"><span class="badge"></span><span data-en>Next</span><span data-es>Siguiente</span></div>
+        <ul>
+          <li><span data-en><b>HHS-approved board certification</b> (e.g., ABMGG — Medical Genetics &amp; Genomics) for high-complexity director eligibility</span><span data-es><b>Certificación de board aprobado por HHS</b> (p. ej., ABMGG — Genética Médica y Genómica) para elegibilidad como director de alta complejidad</span></li>
+          <li><span data-en><b>CLIA high-complexity laboratory director</b> appointment</span><span data-es>Nombramiento como <b>director de laboratorio CLIA de alta complejidad</b></span></li>
+          <li><span data-en>Parallel track: <b>academic / pharma postdoc</b> in translational molecular diagnostics</span><span data-es>Vía paralela: <b>postdoc académico / en farma</b> en diagnóstico molecular traslacional</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="road-note"><span data-en>Open to lab positions — clinical laboratory scientist, technical supervisor, or assistant/associate director roles — where I can accrue the high-complexity experience the director pathway requires.</span><span data-es>Abierto a posiciones de laboratorio — científico de laboratorio clínico, supervisor técnico o roles de director asistente/asociado — donde pueda acumular la experiencia de alta complejidad que exige la ruta de director.</span></p>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">03</span><h2><span data-en>Experience</span><span data-es>Experiencia</span></h2></div>
+    <div class="exp">
+      <div class="job">
+        <div class="when"><span class="yr">2023 — <span data-en>Present</span><span data-es>Presente</span></span>Houston, TX</div>
+        <div>
+          <h3><span data-en>Chief Scientific Advisor &amp; Co-Founder</span><span data-es>Asesor Científico Principal y Cofundador</span></h3>
+          <div class="org">NQ8, Inc. — ComplianceVITALS™</div>
+          <ul>
+            <li><span data-en>Architected and launched an AI-powered regulatory intelligence platform delivering multi-framework gap analyses, crosswalks, and remediation roadmaps for FDA QMSR, CLIA, CAP, IVDR/MDR, ISO, and COFEPRIS.</span><span data-es>Diseñé y lancé una plataforma de inteligencia regulatoria con IA que entrega análisis de brechas multi-marco, crosswalks y hojas de ruta de remediación para FDA QMSR, CLIA, CAP, IVDR/MDR, ISO y COFEPRIS.</span></li>
+            <li><span data-en>Directed a proof-of-concept engagement with a global research hospital, surfacing 2,200+ high-priority observations in three weeks to inform enterprise-wide compliance strategy.</span><span data-es>Dirigí una prueba de concepto con un hospital de investigación global, identificando 2,200+ observaciones de alta prioridad en tres semanas para orientar la estrategia de cumplimiento institucional.</span></li>
+            <li><span data-en>Orchestrated IVDR audit defense and CLIA pathway optimization, compressing accreditation timelines to ~7 months versus an industry standard of 12–18.</span><span data-es>Orquesté defensa de auditoría IVDR y optimización de la ruta CLIA, comprimiendo los plazos de acreditación a ~7 meses frente al estándar de 12–18.</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="job">
+        <div class="when"><span class="yr">2022 — 2023</span>Houston, TX</div>
+        <div>
+          <h3><span data-en>R&amp;D Director</span><span data-es>Director de I+D</span></h3>
+          <div class="org">Arterez, Inc.</div>
+          <ul>
+            <li><span data-en>Directed research and lab operations; designed IRB-approved protocols to validate two diagnostic/predictive machine-learning algorithms for regulatory submission.</span><span data-es>Dirigí investigación y operaciones de laboratorio; diseñé protocolos aprobados por IRB para validar dos algoritmos de aprendizaje automático diagnóstico/predictivo para presentación regulatoria.</span></li>
+            <li><span data-en>Established agile processes that streamlined protocol validation and secured timely IRB approvals.</span><span data-es>Establecí procesos ágiles que agilizaron la validación de protocolos y aseguraron aprobaciones de IRB a tiempo.</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="job">
+        <div class="when"><span class="yr">2021</span>Guadalajara / Miami</div>
+        <div>
+          <h3><span data-en>Business Director</span><span data-es>Director de Negocios</span></h3>
+          <div class="org">DROX Health Science (CRO)</div>
+          <ul>
+            <li><span data-en>Led clinical development strategy and ensured compliance with FDA, ICH, and COFEPRIS, coordinating cross-functional teams toward audit-ready documentation and on-time approvals.</span><span data-es>Lideré la estrategia de desarrollo clínico y aseguré cumplimiento con FDA, ICH y COFEPRIS, coordinando equipos multifuncionales hacia documentación lista para auditoría y aprobaciones a tiempo.</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="job">
+        <div class="when"><span class="yr">2021 — 2023</span>Houston, TX</div>
+        <div>
+          <h3><span data-en>Adjunct Faculty, Biology</span><span data-es>Profesor Adjunto, Biología</span></h3>
+          <div class="org">University of Houston-Downtown</div>
+          <ul>
+            <li><span data-en>Taught Human Biology and lab techniques; integrated regulatory affairs, ethics, and business strategy into the curriculum, helping students secure research internships.</span><span data-es>Impartí Biología Humana y técnicas de laboratorio; integré asuntos regulatorios, ética y estrategia de negocios en el plan de estudios, ayudando a estudiantes a conseguir prácticas de investigación.</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="job">
+        <div class="when"><span class="yr">2018 — 2021</span>Houston, TX</div>
+        <div>
+          <h3><span data-en>Business Development Analyst</span><span data-es>Analista de Desarrollo de Negocios</span></h3>
+          <div class="org">Medical Metrics, Inc. (Imaging Core Lab)</div>
+          <ul>
+            <li><span data-en>Built business development strategies and competitive intelligence for a clinical imaging core lab, expanding the client pipeline and contributing to measurable revenue growth.</span><span data-es>Desarrollé estrategias de desarrollo de negocios e inteligencia competitiva para un laboratorio central de imagen clínica, ampliando la cartera de clientes y contribuyendo a un crecimiento medible de ingresos.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section id="research">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">04</span><h2><span data-en>Selected publications</span><span data-es>Publicaciones seleccionadas</span></h2></div>
+    <p class="sec-sub"><span data-en>Neurodegeneration, autophagy, and molecular genetics — Drosophila and mammalian systems.</span><span data-es>Neurodegeneración, autofagia y genética molecular — sistemas de Drosophila y mamíferos.</span></p>
+    <div class="pubs">
+      <div class="pub">Rui YN, Xu Z, Patel B, … <b>Tito A</b>, David G, Sun Y. Huntingtin functions as a scaffold for selective macroautophagy. <span class="j">Nature Cell Biology 17(3)<span class="yr"> · 2015</span></span></div>
+      <div class="pub">Xu Z, <b>Tito AJ</b>, Rui YN, Zhang S. Studying polyglutamine diseases in Drosophila. <span class="j">Experimental Neurology 274<span class="yr"> · 2015</span></span></div>
+      <div class="pub"><b>Tito AJ</b>, Cheema S, Jiang M, Zhang S. A one-step dissection protocol for whole-mount adult Drosophila brains. <span class="j">JoVE<span class="yr"> · 2016</span></span></div>
+      <div class="pub">Xiong XP, Liang W, Liu W, … <b>Tito A</b>, Situ J, Martinez D, Wu C. The circular RNA Edis regulates neurodevelopment and innate immunity. <span class="j">PLoS Genetics 18(10)<span class="yr"> · 2022</span></span></div>
+      <div class="pub"><b>Tito A</b>, Jimenez-Lopez C, Kowalska A, Wysocki S. Intermolecular interactions of the tolmetin / N-acetyl-L-tyrosine ethyl ester complex. <span class="j">Spectrochimica Acta Part A 72<span class="yr"> · 2009</span></span></div>
+      <div class="pub">Hu B, Xu S, Li G, <b>Tito A</b>, Stimming E, Zhang S. Autophagy cargo receptors in huntingtin turnover and HD pathogenesis. <span class="j">Neurotherapeutics 15(4)<span class="yr"> · 2018</span></span></div>
+      <div class="pub">Furr-Stimming E, Rui YN, … <b>Tito A</b>, et al. Huntingtin as a scaffold for selective macroautophagy. <span class="j">Neurology 88(16 suppl)<span class="yr"> · 2017</span></span></div>
+      <div class="pub">Rui YN, Xu Z, Chen Z, … <b>Tito A</b>, Stimming EF, Zhang S. Dissecting huntingtin's endogenous functions in Drosophila and mammalian systems. <span class="j">Neurotherapeutics 12(1)<span class="yr"> · 2015</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
+<section id="capabilities">
+  <div class="wrap">
+    <div class="sec-head"><span class="num">05</span><h2><span data-en>Capabilities</span><span data-es>Competencias</span></h2></div>
+    <div class="caps">
+      <div class="cap">
+        <h3><span class="k">A</span><span data-en>Molecular &amp; cell biology</span><span data-es>Biología molecular y celular</span></h3>
+        <div class="chips">
+          <span class="chip">qPCR</span><span class="chip">CRISPR-Cas9</span><span class="chip">RNA-seq</span><span class="chip">Microarray</span><span class="chip">Confocal</span><span class="chip">High-content imaging</span><span class="chip">ICV injections</span><span class="chip">In vivo models</span><span class="chip">Histology</span><span class="chip">Behavioral assays</span>
+        </div>
+      </div>
+      <div class="cap">
+        <h3><span class="k">B</span><span data-en>Regulatory &amp; quality</span><span data-es>Regulatorio y calidad</span></h3>
+        <div class="chips">
+          <span class="chip">FDA 820 QMSR</span><span class="chip">CLIA</span><span class="chip">CAP</span><span class="chip">EU IVDR/MDR</span><span class="chip">ISO 13485</span><span class="chip">COFEPRIS</span><span class="chip">Gap analysis</span><span class="chip">LDT→IVD</span><span class="chip">Audit defense</span><span class="chip">GCP</span>
+        </div>
+      </div>
+      <div class="cap">
+        <h3><span class="k">C</span><span data-en>Data &amp; AI integration</span><span data-es>Datos e integración de IA</span></h3>
+        <div class="chips">
+          <span class="chip">Genomics analysis</span><span class="chip">Real-world evidence</span><span class="chip">ML validation</span><span class="chip">Human-in-the-loop</span><span class="chip">Model interpretability</span><span class="chip">Data integrity</span><span class="chip">Traceability</span>
+        </div>
+      </div>
+      <div class="cap">
+        <h3><span class="k">D</span><span data-en>Leadership &amp; communication</span><span data-es>Liderazgo y comunicación</span></h3>
+        <div class="chips">
+          <span class="chip">Experimental design</span><span class="chip">Protocol / IRB</span><span class="chip">Grant writing</span><span class="chip">Team leadership</span><span class="chip">Business development</span><span class="chip">Bilingual EN/ES</span><span class="chip">Public speaking</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- CONTACT -->
+<section id="contact" class="contact">
+  <div class="wrap">
+    <p class="eyebrow"><span data-en>Let's talk</span><span data-es>Hablemos</span></p>
+    <h2><span data-en>Pick up the phone.</span><span data-es>Levanta el teléfono.</span></h2>
+    <p class="big"><span data-en>Open to diagnostic-lab roles, postdoctoral positions, pharma R&amp;D, and regulatory consulting. If your lab needs someone who can run the science and defend the audit — call or email today.</span><span data-es>Abierto a roles en laboratorio diagnóstico, posiciones postdoctorales, I+D en farma y consultoría regulatoria. Si tu laboratorio necesita a alguien que domine la ciencia y defienda la auditoría — llama o escribe hoy.</span></p>
+    <div class="clines">
+      <a class="cline" href="tel:+17139419555">
+        <span class="ic">☎</span>
+        <span><span class="lab" data-en>Phone</span><span class="lab" data-es>Teléfono</span><span class="val">713-941-9555</span></span>
+      </a>
+      <a class="cline" href="mailto:antonio.j.tito@gmail.com">
+        <span class="ic">@</span>
+        <span><span class="lab">Email</span><span class="val">antonio.j.tito@gmail.com</span></span>
+      </a>
+      <a class="cline" href="https://www.linkedin.com/in/antonio-t-29102587/" target="_blank" rel="noopener">
+        <span class="ic">in</span>
+        <span><span class="lab">LinkedIn</span><span class="val" data-en>Connect with me</span><span class="val" data-es>Conéctate conmigo</span></span>
+      </a>
+      <a class="cline" href="#top">
+        <span class="ic">↺</span>
+        <span><span class="lab" data-en>Availability</span><span class="lab" data-es>Disponibilidad</span><span class="val" data-en>Immediate · relocation open</span><span class="val" data-es>Inmediata · reubicación abierta</span></span>
+      </a>
+    </div>
+    <div class="contact-cta">
+      <a href="tel:+17139419555" class="btn big fam-solid"><span data-en>Call now</span><span data-es>Llamar ahora</span></a>
+      <a href="mailto:antonio.j.tito@gmail.com?subject=Let's%20connect" class="btn big outline-l"><span data-en>Send an email</span><span data-es>Enviar correo</span></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="yr"></span> Antonio J. Tito, Ph.D.</span>
+    <span>Houston, TX · <span data-en>Bilingual EN / ES</span><span data-es>Bilingüe EN / ES</span></span>
+  </div>
+</footer>
+
+<script>
+  function setLang(l){
+    document.documentElement.lang = l;
+    document.getElementById('en').classList.toggle('on', l==='en');
+    document.getElementById('es').classList.toggle('on', l==='es');
+    var m=document.getElementById('mtoggle'); if(m) m.textContent = l==='en' ? 'ES' : 'EN';
+    try{ localStorage.setItem('lang', l); }catch(e){}
+  }
+  function toggleLang(){ setLang(document.documentElement.lang==='en' ? 'es' : 'en'); }
+  (function(){
+    var saved; try{ saved = localStorage.getItem('lang'); }catch(e){}
+    if(!saved && (navigator.language||'').toLowerCase().startsWith('es')) saved='es';
+    if(saved) setLang(saved);
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    // animate amplification curve on load
+    var p=document.querySelector('.amp-path');
+    if(p && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+      p.style.transition='stroke-dashoffset 2.2s cubic-bezier(.4,0,.2,1)';
+      requestAnimationFrame(function(){ setTimeout(function(){ p.style.strokeDashoffset='0'; }, 250); });
+    } else if(p){ p.style.strokeDashoffset='0'; }
+  })();
+</script>
+</body>
+</html>

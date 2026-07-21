@@ -1,0 +1,131 @@
+# Data sources
+
+Every source LabLine uses is public-domain U.S. federal data with a documented API.
+Nothing here is scraped, purchased, or licensed.
+
+---
+
+## 1. CMS Provider of Services — Clinical Laboratories
+
+The authoritative registry of CLIA-certified laboratories.
+
+**API endpoints** (newest first — LabLine probes each until one responds):
+
+```
+https://data.cms.gov/data-api/v1/dataset/d3eb38ac-d8e9-40d3-b7b7-6205d3d1dc16/data   2026-01-01
+https://data.cms.gov/data-api/v1/dataset/899fd424-a4aa-400f-85ce-5a7e98334b03/data   2026-01-01
+https://data.cms.gov/data-api/v1/dataset/12fe8c01-ed51-4af9-8902-0e1ec54d9cec/data   2025-10-01
+https://data.cms.gov/data-api/v1/dataset/a1831002-8e90-4ff5-a811-0ea4bed3c4ce/data   2025-07-01
+```
+
+Parameters: `size`, `offset`, and `filter[COLUMN]=value`.
+
+**Direct CSV** (for the offline fallback):
+`https://data.cms.gov/sites/default/files/2026-04/63b67f01-10fe-4233-8f64-e537ba6ee294/clia.DATA.Q1_2026.csv`
+
+Refresh cadence: quarterly (`R/P3M` in the dataset metadata).
+
+Useful columns: `FAC_NAME`, `PRVDR_NUM`, `ST_ADR`, `CITY_NAME`, `STATE_CD`, `ZIP_CD`,
+`CRTFCT_TYPE_CD`. Column names have changed between quarterly releases, so LabLine
+matches them case-insensitively against a list of aliases rather than by exact name.
+
+**Certificate types that matter for a director track:** Certificate of Compliance and
+Certificate of Accreditation indicate labs running non-waived testing. Under 42 CFR
+§493.1443, high-complexity director eligibility requires an earned doctoral degree in a
+chemical, biological, clinical or medical laboratory science plus certification by an
+HHS-approved board. These are the labs where that experience is accrued.
+
+**Known gap:** phone coverage is incomplete. Some quarterly releases omit the phone
+column entirely. This is the main reason NPPES was added.
+
+New quarterly endpoints appear here:
+<https://catalog.data.gov/dataset/provider-of-services-file-clinical-laboratories>
+
+---
+
+## 2. NPPES NPI Registry
+
+Every healthcare organisation with a National Provider Identifier. Best phone coverage
+of the three sources.
+
+```
+https://npiregistry.cms.hhs.gov/api/?version=2.1&enumeration_type=NPI-2
+  &state=TX&taxonomy_description=Clinical%20Medical%20Laboratory&limit=200&skip=0
+```
+
+- `enumeration_type=NPI-2` restricts results to organisations, not individual providers.
+- `limit` maxes out at 200; page with `skip` (capped around 1000).
+- No API key. Updated weekly.
+
+LabLine queries four taxonomy descriptions: Clinical Medical Laboratory, Laboratory,
+Physiological Laboratory, Clinical Pathology.
+
+**Note:** individual-provider records (`NPI-1`) contain personal data. LabLine deliberately
+queries organisations only.
+
+---
+
+## 3. openFDA Device Registration & Listing
+
+FDA-registered device establishments — the closest public equivalent to a biotech and
+IVD-manufacturer directory.
+
+```
+https://api.fda.gov/device/registrationlisting.json?search=registration.state_code:"TX"&limit=100&skip=0
+```
+
+- No API key needed at low volume; rate limits apply above that.
+- Returns HTTP 404 rather than an empty array when results are exhausted.
+- Does **not** publish phone numbers — names and addresses only.
+
+---
+
+## Worth adding next
+
+These have documented public APIs and would meaningfully extend coverage. Contributions welcome.
+
+**NIH RePORTER** — `https://api.reporter.nih.gov/v2/projects/search` (POST). Funded projects
+with organisation names and principal investigators. The single best source for targeting
+academic postdoc positions: it tells you which labs currently hold active funding, which is
+the real precondition for a lab being able to hire you.
+
+**ClinicalTrials.gov v2** — `https://clinicaltrials.gov/api/v2/studies`. Trial sponsors and
+site facilities. Good for finding CROs and sponsor companies actively running studies in
+your state.
+
+**SEC EDGAR full-text search** — `https://efts.sec.gov/LATEST/search-index?q=...`. Public
+biotech companies by SIC code (2836 biological products, 8731 commercial physical and
+biological research). Gives corporate addresses and filings, not phone numbers.
+
+**State health department laboratory lists** — several states publish their own licensed-lab
+registries with better contact data than the federal file. New York (Wadsworth Center),
+California, Florida, and Washington all publish lists. These are per-state and formats vary.
+
+---
+
+## Sources deliberately excluded
+
+**LinkedIn, ZoomInfo, Apollo, and similar.** Scraping LinkedIn violates its terms of service
+and has produced actual litigation. Purchased contact databases are compiled without the
+consent of the people in them, and reselling or acting on that data raises obligations under
+state privacy laws.
+
+There is also a practical argument. Clinical diagnostics is a small field, and laboratory
+directors talk to each other. A candidate who reaches out through a channel that is obviously
+sourced from a scraped list reads as a vendor, not a colleague. If you are positioning
+yourself as a regulatory and compliance professional, the way you source your own data is
+part of your credibility.
+
+Public federal registries are better on every axis that matters here: legal, free, more
+complete for laboratories specifically, and defensible when someone asks where you got
+their number.
+
+---
+
+## Handling contact data responsibly
+
+- Facility main lines only. LabLine never surfaces, stores, or exports the laboratory
+  director names present in some source files.
+- Manual dialling only. Automated calling to these numbers implicates the TCPA.
+- Verify before dialling — federal files are quarterly snapshots and go stale.
+- Pipeline notes stay in the user's own browser. There is no server and no analytics.
