@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "dataset": "LabLine community lab profiles (seed sample)",
+    "count": 3,
+    "generated": "2026-07-21",
+    "note": "Public-domain U.S. federal facility data plus AI/human-summarized public web info, company-level ONLY. No personal data or individual names. Hand-built seed sample proving the schema; the app generates entries like these in bulk on the user's machine. Unverified — confirm before relying on any entry.",
+    "schema": ["name", "city", "state", "zip", "certificate", "facility_phone", "external_id", "listed_in", "profile", "profile_sources", "researched"]
+  },
+  "labs": [
+    {
+      "name": "Baylor Genetics",
+      "city": "Houston",
+      "state": "TX",
+      "zip": "",
+      "certificate": "",
+      "facility_phone": "",
+      "external_id": "",
+      "listed_in": ["web sample"],
+      "profile": "Summary: Clinical genomics laboratory in Houston's Texas Medical Center; a joint venture of H.U. Group Holdings and Baylor College of Medicine's Department of Molecular and Human Genetics [1].\n\nServices / testing focus:\n- Whole genome and whole exome sequencing plus focused panels [1]\n- 3,000+ tests offered; 100,000+ tests performed per year [1]\n- Family planning, prenatal, neonatal/pediatric, oncology, and pharmacogenomics [1]\n\nScope & signals:\n- Serves clients in 50 states and 16 countries [1]\n- Awarded a multi-year national U.S. Department of Veterans Affairs contract for pharmacogenomic and germline/hereditary-cancer testing [2]\n\nSources:\n[1] https://www.baylorgenetics.com\n[2] https://www.tmc.edu/press-releases/baylor-genetics-launches-pharmacogenomic-and-germline-genetic-testing-for-the-u-s-department-of-veterans-affairs/",
+      "profile_sources": [
+        "https://www.baylorgenetics.com/news/baylor-genetics-and-baylor-college-of-medicine-announce-new-lab-agreement/",
+        "https://www.tmc.edu/press-releases/baylor-genetics-launches-pharmacogenomic-and-germline-genetic-testing-for-the-u-s-department-of-veterans-affairs/"
+      ],
+      "researched": "2026-07-21"
+    },
+    {
+      "name": "Castle Biosciences, Inc.",
+      "city": "Friendswood",
+      "state": "TX",
+      "zip": "77546",
+      "certificate": "",
+      "facility_phone": "",
+      "external_id": "",
+      "listed_in": ["web sample"],
+      "profile": "Summary: Molecular diagnostics company (founded 2008), corporate headquarters in Friendswood, TX; develops prognostic and diagnostic tests to guide patient care [1].\n\nServices / testing focus:\n- Molecular prognostic/diagnostic tests focused on dermatologic and gastroenterological disease — skin, eye, and gastrointestinal cancers [1]\n\nScope & signals:\n- HQ at 1500 West Parkwood Avenue, Friendswood, TX; laboratory facilities in Phoenix, AZ and Pittsburgh, PA [1]\n- New corporate headquarters grand opening in March 2026 [2]\n- Publicly traded (Nasdaq: CSTL) [1]\n\nSources:\n[1] https://ir.castlebiosciences.com/company-info\n[2] https://communityimpact.com/houston/pearland-friendswood-manvel/health-care/2026/03/23/castle-biosciences-to-hold-grand-opening-in-friendswood/",
+      "profile_sources": [
+        "https://ir.castlebiosciences.com/company-info",
+        "https://communityimpact.com/houston/pearland-friendswood-manvel/health-care/2026/03/23/castle-biosciences-to-hold-grand-opening-in-friendswood/"
+      ],
+      "researched": "2026-07-21"
+    },
+    {
+      "name": "Luminex Corporation",
+      "city": "Austin",
+      "state": "TX",
+      "zip": "78727",
+      "certificate": "",
+      "facility_phone": "",
+      "external_id": "",
+      "listed_in": ["web sample"],
+      "profile": "Summary: Austin, TX biotechnology company (founded 1995), a DiaSorin company; develops and manufactures multiplexed biological testing technologies [1].\n\nServices / testing focus:\n- xMAP multiplexing bead technology enabling simultaneous analysis of many bioassays [1]\n- Applications across clinical diagnostics, pharmaceutical drug discovery, biomedical research, flow cytometry, genomic/proteomic research, and food safety [1]\n\nScope & signals:\n- Based at 12212 Technology Blvd, Austin, TX; roughly 745 employees [1]\n- FDA-registered IVD manufacturer profile (SEC filings) [2]\n\nSources:\n[1] https://www.bionity.com/en/companies/20719/luminex-corporation.html\n[2] https://www.sec.gov/Archives/edgar/data/1033905/000095014406002405/g00174e10vk.htm",
+      "profile_sources": [
+        "https://www.bionity.com/en/companies/20719/luminex-corporation.html",
+        "https://www.sec.gov/Archives/edgar/data/1033905/000095014406002405/g00174e10vk.htm"
+      ],
+      "researched": "2026-07-21"
+    }
+  ]
+}
