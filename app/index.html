@@ -436,8 +436,8 @@
       </div>
       <div class="fld">
         <label>Search URL</label>
-        <input id="llmSearchUrl" placeholder="http://localhost:8791/search" />
-        <div class="hint">Browsers can't call <code>ollama.com</code> directly (CORS). Run <code>tools/ollama-search-proxy.py</code> and point here: <code>http://localhost:8791/search</code>. The proxy holds your key — nothing sensitive in the browser.</div>
+        <input id="llmSearchUrl" placeholder="http://127.0.0.1:8791/search" />
+        <div class="hint">Browsers can't call <code>ollama.com</code> directly (CORS). Run <code>tools/ollama-search-proxy.py</code> and point here: <code>http://127.0.0.1:8791/search</code> (use <code>127.0.0.1</code>, not <code>localhost</code>). The proxy holds your key — nothing sensitive in the browser.</div>
       </div>
       <div class="fld">
         <label>Search key (optional)</label>
@@ -1013,7 +1013,7 @@ function openSettings(){
   document.getElementById('llmEndpoint').value=c.endpoint||'http://localhost:11434';
   document.getElementById('llmModel').value=c.model||'';
   document.getElementById('llmSearchOn').checked=!!c.searchOn;
-  document.getElementById('llmSearchUrl').value=c.searchUrl||'http://localhost:8791/search';
+  document.getElementById('llmSearchUrl').value=c.searchUrl||'http://127.0.0.1:8791/search';
   document.getElementById('llmWebKey').value=c.webKey||'';
   document.getElementById('settingsMsg').textContent='';
   openModal('mSettings');

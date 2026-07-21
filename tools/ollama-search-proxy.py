@@ -22,7 +22,7 @@ SETUP
 
   3) In LabLine -> AI settings:
         Enable web search:  on
-        Search URL:         http://localhost:8791/search
+        Search URL:         http://127.0.0.1:8791/search   (use 127.0.0.1, not localhost)
         Search key:         leave BLANK (the proxy holds it)
 
 Optional env vars:  PORT (default 8791), ALLOW_ORIGIN (default *).
@@ -82,6 +82,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     state = "set" if KEY else "MISSING — set OLLAMA_API_KEY"
-    print(f"LabLine Ollama search proxy: http://localhost:{PORT}/search   (key: {state})")
-    print("Point LabLine -> AI settings -> Search URL at the address above. Ctrl+C to stop.")
+    print(f"LabLine Ollama search proxy: http://127.0.0.1:{PORT}/search   (key: {state})")
+    print("In LabLine -> AI settings, set Search URL to the address above (use 127.0.0.1). Ctrl+C to stop.")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

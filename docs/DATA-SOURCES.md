@@ -170,8 +170,8 @@ and returns it with CORS headers the page accepts. Setup:
 # 2) run the proxy (Windows PowerShell):
 $env:OLLAMA_API_KEY = "your-key"
 python tools/ollama-search-proxy.py
-# 3) LabLine -> AI settings: Enable web search, Search URL = http://localhost:8791/search,
-#    Search key = blank
+# 3) LabLine -> AI settings: Enable web search, Search URL = http://127.0.0.1:8791/search
+#    (use 127.0.0.1, not localhost), Search key = blank
 ```
 
 "Research & Prep" then runs research over your currently-filtered leads in a capped batch,
