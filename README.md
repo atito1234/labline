@@ -33,16 +33,18 @@ No build step. No dependencies.
 git clone https://github.com/YOUR-USERNAME/labline.git
 cd labline
 python3 -m http.server 8000
-# open http://localhost:8000
+# open http://localhost:8000        -> landing page
+# open http://localhost:8000/app/   -> the directory tool
 ```
 
-Opening `index.html` directly from disk also works, though some browsers restrict
+Opening the HTML files directly from disk also works, though some browsers restrict
 cross-origin requests on `file://` URLs. Use the local server if a source fails to load.
 
 ## Layout
 
 ```
-index.html            the app
+index.html            landing page (the front door)
+app/index.html        the directory tool
 profile/index.html    personal portfolio site
 docs/DATA-SOURCES.md  endpoints, limits, and how to add a source
 ```

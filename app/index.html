@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LabLine — CLIA lab &amp; biotech job-search directory</title>
+<meta name="description" content="Search CLIA-certified laboratories, registered device/IVD firms, and NPI-listed labs by state. Track your outreach and export your pipeline. Built on public federal data." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0a1826;--ink-2:#22384c;--paper:#fbfcfd;--paper-2:#f2f6f9;
+    --line:#dbe4ea;--muted:#5a6c7a;
+    --fam:#12b3a6;--fam-deep:#0a7d74;--rox:#e2683c;--cy5:#3b5bdb;--amber:#b5811f;
+    --radius:12px;
+    --fd:"Sora",system-ui,sans-serif;--fb:"Inter",system-ui,sans-serif;--fm:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--fb);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--fd);font-weight:600;margin:0;line-height:1.15}
+  .mono{font-family:var(--fm)}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 22px}
+
+  header{position:sticky;top:0;z-index:40;background:rgba(251,252,253,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .hin{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--fd);font-weight:600;font-size:17px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--fam);box-shadow:0 0 0 4px rgba(18,179,166,.16)}
+  .brand small{font-family:var(--fm);font-weight:400;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  .hactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+  button,.btn{font-family:var(--fb);font-size:13.5px;font-weight:500;padding:8px 15px;border-radius:20px;
+    border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+  button:hover,.btn:hover{border-color:var(--ink);background:var(--paper-2)}
+  button.acc{background:var(--fam);border-color:var(--fam);color:#04211f}
+  button.acc:hover{background:var(--fam-deep);border-color:var(--fam-deep);color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  input,select,textarea{font-family:var(--fb);font-size:14px;padding:9px 12px;border:1px solid var(--line);
+    border-radius:9px;background:#fff;color:var(--ink);width:100%}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fam);box-shadow:0 0 0 3px rgba(18,179,166,.14)}
+  label.fl{display:block;font-family:var(--fm);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin:20px 0}
+  .panel h2{font-size:16px;margin-bottom:4px}
+  .panel .ph{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+
+  .srcs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .sbox{border:1px solid var(--line);border-radius:10px;padding:15px;background:var(--paper-2);display:flex;flex-direction:column}
+  .sbox h3{font-size:13.5px;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+  .sbox .k{font-family:var(--fm);font-size:10px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:2px 8px;color:var(--fam-deep)}
+  .sbox p{font-size:12.5px;color:var(--muted);margin:0 0 12px;flex:1}
+  .sbox .act{display:flex;gap:8px;align-items:flex-end}
+  .sbox .act > *{flex:1}
+  .sbox .act button{flex:0 0 auto}
+
+  .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:12px;align-items:end}
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:18px 0}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .stat .lab{font-family:var(--fm);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .stat .val{font-family:var(--fd);font-size:24px;font-weight:600;margin-top:2px}
+  .stat.s-fam .val{color:var(--fam-deep)} .stat.s-rox .val{color:var(--rox)} .stat.s-cy5 .val{color:var(--cy5)}
+
+  table{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
+  .tblwrap{border:1px solid var(--line);border-radius:var(--radius);overflow:auto;max-height:70vh}
+  thead th{position:sticky;top:0;background:var(--paper-2);text-align:left;font-family:var(--fm);font-size:10.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:2}
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--paper-2);vertical-align:top}
+  tbody tr:hover{background:#f8fbfc}
+  .lname{font-weight:600;display:block;margin-bottom:2px}
+  .lmeta{font-family:var(--fm);font-size:11px;color:var(--muted)}
+  .addr{color:var(--muted);font-size:13px}
+  .tel{font-family:var(--fm);font-size:13.5px;color:var(--fam-deep);font-weight:500;text-decoration:none;white-space:nowrap}
+  .tel:hover{text-decoration:underline}
+  .notel{font-family:var(--fm);font-size:12px;color:var(--muted)}
+  .notel a{color:var(--cy5);text-decoration:none}
+  .pill{display:inline-block;font-family:var(--fm);font-size:10px;padding:3px 8px;border-radius:20px;white-space:nowrap;border:1px solid;margin:0 4px 4px 0}
+  .p-hi{background:#fdf1ec;color:#8d3f1c;border-color:#f2cdbd}
+  .p-mod{background:#eef3fb;color:#2f45a8;border-color:#ccd8f2}
+  .p-waiv{background:#f1f5f7;color:#4a5e6c;border-color:#dce5ea}
+  .p-src{background:#e9f7f5;color:#0a5f58;border-color:#bfe6e1}
+  select.status{padding:6px 8px;font-size:12.5px;border-radius:8px;min-width:132px}
+  .st-new{color:var(--muted)} .st-called{color:var(--fam-deep);font-weight:500}
+  .st-followup{color:var(--rox);font-weight:500} .st-interview{color:var(--cy5);font-weight:500}
+  .st-no{color:#9aa8b2}
+  textarea.note{min-height:34px;font-size:12.5px;padding:7px 9px;resize:vertical;line-height:1.4}
+
+  .empty{text-align:center;padding:60px 24px;color:var(--muted)}
+  .empty h3{font-size:19px;color:var(--ink);margin-bottom:10px}
+  .empty p{max-width:56ch;margin:0 auto 8px;font-size:14.5px}
+  .note-box{border-left:3px solid var(--amber);background:#fdf8ee;padding:12px 16px;border-radius:0 8px 8px 0;font-size:13.5px;color:#5c4a20;margin:14px 0}
+  .log{font-family:var(--fm);font-size:12px;color:var(--muted);margin:12px 0 0;max-height:140px;overflow:auto;
+    background:var(--paper-2);border-radius:8px;padding:10px 12px;display:none}
+  .log div{padding:1px 0}
+  .log .err{color:#a8331f} .log .ok{color:var(--fam-deep)}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding:22px 0 40px;font-family:var(--fm);font-size:11.5px;color:var(--muted)}
+  footer p{margin:0 0 6px} footer a{color:var(--cy5)}
+  @media (max-width:1020px){
+    .srcs,.filters{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    thead{display:none}
+    tbody td{display:block;border-bottom:0;padding:6px 14px}
+    tbody tr{display:block;border-bottom:1px solid var(--line);padding:10px 0}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hin">
+    <div class="brand"><span class="dot"></span> LabLine <small>lab &amp; biotech directory</small></div>
+    <div class="hactions">
+      <button onclick="clearData()" id="btnClear" disabled>Clear results</button>
+      <button onclick="importPipeline()">Import pipeline</button>
+      <button onclick="exportPipeline()" id="btnExport" disabled>Export pipeline (CSV)</button>
+      <input type="file" id="pipeFile" accept=".csv" hidden onchange="handlePipeImport(event)" />
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="panel">
+    <h2>1 · Load organisations</h2>
+    <p class="ph">Three independent public federal sources. Load as many as you want — results merge and de-duplicate. Everything runs in your browser; nothing is sent to a server.</p>
+
+    <div class="row" style="display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:end;margin-bottom:16px">
+      <div>
+        <label class="fl" for="gState">State to load</label>
+        <select id="gState"></select>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);padding-bottom:9px">
+        Each source is fetched independently — if one is down or blocked, the others still load.
+      </div>
+    </div>
+
+    <div class="srcs">
+      <div class="sbox">
+        <h3><span class="k">CMS</span> CLIA laboratories</h3>
+        <p>Every CLIA-certified lab in the state: name, address, certificate type. The core list — includes high-complexity labs.</p>
+        <div class="act"><button class="acc" id="btnCMS" onclick="loadCMS()">Load CLIA labs</button></div>
+      </div>
+      <div class="sbox">
+        <h3><span class="k">NPPES</span> NPI-registered labs</h3>
+        <p>National Provider Identifier registry. Best phone-number coverage of the three — this is where you get numbers to dial.</p>
+        <div class="act"><button class="acc" id="btnNPI" onclick="loadNPI()">Load NPI labs</button></div>
+      </div>
+      <div class="sbox">
+        <h3><span class="k">openFDA</span> Device &amp; IVD firms</h3>
+        <p>FDA-registered device establishments — diagnostics manufacturers and biotech firms with regulated products.</p>
+        <div class="act"><button class="acc" id="btnFDA" onclick="loadFDA()">Load device firms</button></div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px">
+      <label class="fl">Offline fallback — load a CSV you downloaded</label>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <input type="file" id="csvFile" accept=".csv,text/csv" onchange="handleCSV(event)" style="max-width:340px" />
+        <a class="btn" href="https://data.cms.gov/sites/default/files/2026-04/63b67f01-10fe-4233-8f64-e537ba6ee294/clia.DATA.Q1_2026.csv" target="_blank" rel="noopener">Download CMS CLIA file (Q1 2026)</a>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="panel" id="filterPanel" hidden>
+    <h2>2 · Filter and call</h2>
+    <p class="ph">Narrow the list, then work top to bottom. Set a status on each row so you never call the same place twice.</p>
+    <div class="filters">
+      <div>
+        <label class="fl" for="q">Search name, city, or ID</label>
+        <input id="q" placeholder="molecular, genomics, pathology…" oninput="render()" />
+      </div>
+      <div><label class="fl" for="fState">State</label><select id="fState" onchange="render()"><option value="">All</option></select></div>
+      <div><label class="fl" for="fSource">Source</label><select id="fSource" onchange="render()"><option value="">All</option></select></div>
+      <div><label class="fl" for="fCert">Category</label><select id="fCert" onchange="render()"><option value="">All</option></select></div>
+      <div><label class="fl" for="fStatus">My status</label>
+        <select id="fStatus" onchange="render()">
+          <option value="">All</option><option value="new">Not contacted</option><option value="called">Called</option>
+          <option value="followup">Follow up</option><option value="interview">Interview</option><option value="no">Not a fit</option>
+        </select></div>
+      <div style="flex:0 0 auto"><button onclick="resetFilters()">Reset</button></div>
+    </div>
+
+    <div style="margin-top:12px">
+      <label style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-2);cursor:pointer">
+        <input type="checkbox" id="onlyPhone" onchange="render()" style="width:auto" /> Only show rows that have a phone number
+      </label>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="lab">Loaded</div><div class="val" id="sLoaded">0</div></div>
+      <div class="stat"><div class="lab">Matching filters</div><div class="val" id="sShown">0</div></div>
+      <div class="stat s-fam"><div class="lab">With a phone</div><div class="val" id="sPhone">0</div></div>
+      <div class="stat s-rox"><div class="lab">Contacted</div><div class="val" id="sContacted">0</div></div>
+      <div class="stat s-cy5"><div class="lab">Interviews</div><div class="val" id="sInterview">0</div></div>
+    </div>
+
+    <div class="note-box">
+      <b>Verify before you dial.</b> Federal files go stale between refreshes and phone coverage varies by source. These are facility main lines — business contact data, not personal contacts. Call manually; do not autodial.
+    </div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Sources: CMS Provider of Services File — Clinical Laboratories · NPPES NPI Registry · openFDA Device Registration &amp; Listing. All public-domain U.S. federal data.</p>
+    <p>Your pipeline stays in this browser. <a href="../">← LabLine home</a> · <a href="../docs/DATA-SOURCES.md">Data sources and limits →</a></p>
+  </div>
+</footer>
+
+<script>
+const STATES=["AK","AL","AR","AZ","CA","CO","CT","DC","DE","FL","GA","HI","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR","PA","PR","RI","SC","SD","TN","TX","UT","VA","VT","WA","WI","WV","WY"];
+const STATUS_LABELS={new:"Not contacted",called:"Called",followup:"Follow up",interview:"Interview",no:"Not a fit"};
+
+// Verified 2026 CMS data-api endpoints, newest first. If the newest 404s we fall back.
+const CMS_ENDPOINTS=[
+  "https://data.cms.gov/data-api/v1/dataset/d3eb38ac-d8e9-40d3-b7b7-6205d3d1dc16/data",
+  "https://data.cms.gov/data-api/v1/dataset/899fd424-a4aa-400f-85ce-5a7e98334b03/data",
+  "https://data.cms.gov/data-api/v1/dataset/12fe8c01-ed51-4af9-8902-0e1ec54d9cec/data",
+  "https://data.cms.gov/data-api/v1/dataset/a1831002-8e90-4ff5-a811-0ea4bed3c4ce/data"
+];
+
+let LABS=[], SHOWN=[], SEEN=new Map();   // dedupe key -> record, so merges stay O(1)
+let PIPE=loadPipe();
+
+/* ---------------- storage ---------------- */
+function loadPipe(){ try{const r=localStorage.getItem('labline_pipe');return r?JSON.parse(r):{};}catch(e){return {};} }
+function savePipe(){ try{localStorage.setItem('labline_pipe',JSON.stringify(PIPE));}catch(e){}
+  document.getElementById('btnExport').disabled=Object.keys(PIPE).length===0; }
+
+/* ---------------- logging ---------------- */
+function log(msg,kind){
+  const el=document.getElementById('log'); el.style.display='block';
+  const d=document.createElement('div'); if(kind) d.className=kind;
+  d.textContent=new Date().toLocaleTimeString()+'  '+msg;
+  el.appendChild(d); el.scrollTop=el.scrollHeight;
+}
+
+/* ---------------- helpers ---------------- */
+function cleanPhone(v){ if(!v)return''; const d=String(v).replace(/\D/g,'');
+  if(d.length===11&&d[0]==='1')return d.slice(1); return d.length===10?d:''; }
+function fmtPhone(d){ return d?`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`:''; }
+function titleCase(s){ return String(s||'').toLowerCase().replace(/\b[a-z]/g,m=>m.toUpperCase())
+  .replace(/\bLlc\b/g,'LLC').replace(/\bInc\b/g,'Inc').replace(/\bDba\b/g,'DBA')
+  .replace(/\bPc\b/g,'PC').replace(/\bMd\b/g,'MD').replace(/\bUs\b/g,'US').replace(/\bIi\b/g,'II'); }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function dedupeKey(r){ return (r.name+'|'+r.city+'|'+r.state).toLowerCase().replace(/[^a-z0-9|]/g,''); }
+function certClass(c){ const s=String(c||'').toLowerCase();
+  if(s.includes('compliance')||s.includes('accredit'))return 'p-hi';
+  if(s.includes('waiv'))return 'p-waiv'; return 'p-mod'; }
+
+function addRecords(recs,sourceName){
+  let added=0;
+  for(const r of recs){
+    if(!r.name) continue;
+    const k=dedupeKey(r);
+    if(SEEN.has(k)){
+      const ex=SEEN.get(k);
+      if(!ex.phone && r.phone) ex.phone=r.phone;                // enrich missing phones
+      if(!ex.sources.includes(sourceName)) ex.sources.push(sourceName);
+      continue;
+    }
+    SEEN.set(k,r); r.sources=[sourceName]; r.id=r.id||k; LABS.push(r); added++;
+  }
+  log(`${sourceName}: ${added} new, ${recs.length-added} merged into existing rows`, 'ok');
+  afterLoad();
+}
+function afterLoad(){
+  document.getElementById('filterPanel').hidden=LABS.length===0;
+  document.getElementById('btnClear').disabled=LABS.length===0;
+  buildFilterOptions(); render();
+}
+function clearData(){ LABS=[]; SHOWN=[]; SEEN=new Map(); afterLoad(); log('Results cleared. Your pipeline notes are kept.'); }
+
+/* ---------------- source A: CMS CLIA ---------------- */
+async function loadCMS(){
+  const st=document.getElementById('gState').value, btn=document.getElementById('btnCMS');
+  btn.disabled=true;
+  try{
+    let base=null;
+    for(const ep of CMS_ENDPOINTS){
+      try{ const probe=await fetch(`${ep}?size=1`); if(probe.ok){ base=ep; break; } }catch(e){}
+    }
+    if(!base) throw new Error('no reachable CMS endpoint (network or CORS blocked)');
+    log('CMS endpoint: '+base.split('/dataset/')[1].slice(0,8)+'…');
+
+    const out=[]; const SIZE=5000;
+    for(let off=0; off<200000; off+=SIZE){
+      const params=new URLSearchParams({size:SIZE,offset:off});
+      if(st) params.set('filter[STATE_CD]',st);
+      params.set('filter[PGM_TRMNTN_CD]','00');   // 00 = active; ~73% of the raw file is terminated labs
+      const res=await fetch(`${base}?${params}`);
+      if(!res.ok) throw new Error('CMS returned HTTP '+res.status);
+      let arr=await res.json();
+      if(!Array.isArray(arr)) arr=arr.data||[];
+      if(!arr.length) break;
+      out.push(...arr);
+      log(`CMS: ${out.length.toLocaleString()} rows fetched…`);
+      if(arr.length<SIZE) break;
+    }
+    if(!out.length) throw new Error('CMS returned zero rows for '+(st||'all states'));
+
+    const pick=(o,keys)=>{ for(const k of keys){ for(const kk of Object.keys(o)){ if(kk.toLowerCase()===k) return o[kk]; } } return ''; };
+    // CRTFCT_TYPE_CD is a numeric code in the live file, not text
+    const CERT_TYPES={'1':'Compliance','2':'Waiver','3':'Accreditation','4':'PPM Microscopy','9':'Registration'};
+    let recs=out.map(o=>({
+      name:titleCase(pick(o,['fac_name','facility_name','provider_name','name'])),
+      extId:String(pick(o,['prvdr_num','provider_number','clia_number','ccn'])||''),
+      addr:titleCase(pick(o,['st_adr','street_address','address'])),
+      city:titleCase(pick(o,['city_name','city'])),
+      state:String(pick(o,['state_cd','state'])||'').toUpperCase().slice(0,2),
+      zip:String(pick(o,['zip_cd','zip','zip_code'])||'').slice(0,5),
+      phone:cleanPhone(pick(o,['phne_num','phone_number','phone','telephone'])),
+      cert:(v=>CERT_TYPES[v]||titleCase(v))(String(pick(o,['crtfct_type_cd','certificate_type','cert_type'])||'').trim())
+    }));
+    if(st) recs=recs.filter(r=>!r.state||r.state===st);   // client-side guard if server filter ignored
+    addRecords(recs,'CMS CLIA');
+  }catch(err){
+    log('CMS failed — '+err.message+'. Use the CSV fallback below.','err');
+  }finally{ btn.disabled=false; }
+}
+
+/* ---------------- source B: NPPES NPI registry ---------------- */
+const NPI_TAXONOMIES=["Clinical Medical Laboratory","Laboratory","Physiological Laboratory","Clinical Pathology"];
+async function loadNPI(){
+  const st=document.getElementById('gState').value, btn=document.getElementById('btnNPI');
+  if(!st){ log('NPPES requires a specific state — pick one above.','err'); return; }
+  btn.disabled=true;
+  try{
+    const recs=[];
+    for(const tax of NPI_TAXONOMIES){
+      for(let skip=0; skip<1000; skip+=200){
+        const u=`https://npiregistry.cms.hhs.gov/api/?version=2.1&enumeration_type=NPI-2&state=${st}`
+          +`&taxonomy_description=${encodeURIComponent(tax)}&limit=200&skip=${skip}`;
+        let res;
+        try{ res=await fetch(u); }
+        catch(e){
+          // the NPPES API sends no Access-Control-Allow-Origin header (verified 2026-07),
+          // so browsers block the response even though the endpoint itself is up
+          throw new Error('blocked by the browser. The NPPES API does not send CORS headers, '
+            +'so no web page can read it directly — this is an NPPES limitation, not an outage. '
+            +'Use the CSV fallback below, or see docs/DATA-SOURCES.md for the downloadable NPPES file.');
+        }
+        if(!res.ok) throw new Error('NPPES HTTP '+res.status);
+        const j=await res.json();
+        const results=j.results||[];
+        if(!results.length) break;
+        for(const r of results){
+          const loc=(r.addresses||[]).find(a=>a.address_purpose==='LOCATION')||(r.addresses||[])[0]||{};
+          recs.push({
+            name:titleCase((r.basic&&(r.basic.organization_name||r.basic.name))||''),
+            extId:'NPI '+r.number,
+            addr:titleCase(loc.address_1||''),
+            city:titleCase(loc.city||''),
+            state:String(loc.state||'').toUpperCase().slice(0,2),
+            zip:String(loc.postal_code||'').slice(0,5),
+            phone:cleanPhone(loc.telephone_number),
+            cert:tax
+          });
+        }
+        log(`NPPES "${tax}": ${recs.length} rows so far…`);
+        if(results.length<200) break;
+      }
+    }
+    if(!recs.length) throw new Error('no results returned');
+    addRecords(recs,'NPPES');
+  }catch(err){ log('NPPES failed — '+err.message,'err'); }
+  finally{ btn.disabled=false; }
+}
+
+/* ---------------- source C: openFDA device establishments ---------------- */
+async function loadFDA(){
+  const st=document.getElementById('gState').value, btn=document.getElementById('btnFDA');
+  if(!st){ log('openFDA works best with a specific state — pick one above.','err'); return; }
+  btn.disabled=true;
+  try{
+    const recs=[]; const LIMIT=100;
+    for(let skip=0; skip<1000; skip+=LIMIT){
+      const u=`https://api.fda.gov/device/registrationlisting.json`
+        +`?search=registration.state_code:"${st}"&limit=${LIMIT}&skip=${skip}`;
+      const res=await fetch(u);
+      if(res.status===404) break;                       // openFDA returns 404 when no more results
+      if(!res.ok) throw new Error('openFDA HTTP '+res.status);
+      const j=await res.json();
+      const results=j.results||[];
+      if(!results.length) break;
+      for(const r of results){
+        const reg=r.registration||{};
+        const prods=(r.products||[]).map(p=>p.openfda&&p.openfda.device_name).filter(Boolean);
+        recs.push({
+          name:titleCase(reg.name||''),
+          extId:'FEI '+(reg.fei_number||reg.registration_number||''),
+          addr:titleCase([reg.address_line_1,reg.address_line_2].filter(Boolean).join(' ')),
+          city:titleCase(reg.city||''),
+          state:String(reg.state_code||'').toUpperCase().slice(0,2),
+          zip:String(reg.zip_code||reg.postal_code||'').slice(0,5),  // US records use zip_code; postal_code is empty
+          phone:'',                                     // openFDA does not publish phone numbers
+          cert:prods[0]?('Device: '+titleCase(prods[0])):'Registered device firm'
+        });
+      }
+      log(`openFDA: ${recs.length} device firms so far…`);
+      if(results.length<LIMIT) break;
+    }
+    if(!recs.length) throw new Error('no results for '+st);
+    addRecords(recs,'openFDA');
+  }catch(err){ log('openFDA failed — '+err.message,'err'); }
+  finally{ btn.disabled=false; }
+}
+
+/* ---------------- CSV fallback ---------------- */
+function parseCSV(text){
+  const rows=[]; let row=[],field='',q=false;
+  text=text.replace(/^\uFEFF/,'');
+  for(let i=0;i<text.length;i++){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else q=false; } else field+=c; }
+    else { if(c==='"')q=true;
+      else if(c===','){row.push(field);field='';}
+      else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+      else if(c!=='\r')field+=c; } }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(r=>r.some(v=>v.trim()!==''));
+}
+const HINTS={name:["fac_name","facility_name","provider_name","lab_name","name"],
+  extId:["prvdr_num","provider_number","clia_number","clia","ccn"],
+  addr:["st_adr","street_address","address","addr"],city:["city_name","city"],
+  state:["state_cd","state_code","state"],zip:["zip_cd","zip_code","zip"],
+  phone:["phne_num","phone_number","telephone","phone"],
+  cert:["crtfct_type_cd","certificate_type","cert_type","certification"]};
+function handleCSV(e){
+  const f=e.target.files[0]; if(!f) return;
+  log('Reading '+f.name+'…');
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const rows=parseCSV(rd.result);
+      if(rows.length<2){ log('That file had no data rows.','err'); return; }
+      const norm=rows[0].map(h=>String(h).toLowerCase().replace(/[^a-z0-9]/g,'_'));
+      const map={};
+      for(const [key,hints] of Object.entries(HINTS)){
+        let best=-1,score=99;
+        norm.forEach((h,i)=>hints.forEach((hint,rank)=>{
+          if(h===hint&&rank<score){best=i;score=rank;}
+          else if(score>50&&h.includes(hint)){best=i;score=51+rank;}
+        }));
+        if(best>=0) map[key]=best;
+      }
+      if(!('name' in map)){ log("No facility-name column found — is this the full CMS file with headers?",'err'); return; }
+      const g=(r,k)=>(k in map)?String(r[map[k]]||'').trim():'';
+      const recs=[];
+      for(let i=1;i<rows.length;i++){
+        const r=rows[i]; const nm=g(r,'name'); if(!nm) continue;
+        recs.push({name:titleCase(nm),extId:g(r,'extId'),addr:titleCase(g(r,'addr')),
+          city:titleCase(g(r,'city')),state:g(r,'state').toUpperCase().slice(0,2),
+          zip:g(r,'zip').slice(0,5),phone:cleanPhone(g(r,'phone')),cert:titleCase(g(r,'cert'))});
+      }
+      log('Columns matched: '+Object.keys(map).join(', '));
+      addRecords(recs,'CSV import');
+    }catch(err){ log('Could not parse that file: '+err.message,'err'); }
+  };
+  rd.readAsText(f);
+}
+
+/* ---------------- filters + render ---------------- */
+function buildFilterOptions(){
+  const uniq=(f)=>[...new Set(LABS.flatMap(f).filter(Boolean))].sort();
+  const fill=(id,vals,label)=>{ const el=document.getElementById(id); const cur=el.value;
+    el.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option>${esc(v)}</option>`).join('');
+    if(vals.includes(cur)) el.value=cur; };
+  fill('fState',uniq(l=>[l.state]),'All states');
+  fill('fSource',uniq(l=>l.sources),'All sources');
+  fill('fCert',uniq(l=>[l.cert]),'All categories');
+}
+function resetFilters(){ ['q','fState','fSource','fCert','fStatus'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('onlyPhone').checked=false; render(); }
+function currentFilter(){
+  const q=document.getElementById('q').value.trim().toLowerCase();
+  const st=document.getElementById('fState').value, sr=document.getElementById('fSource').value;
+  const ct=document.getElementById('fCert').value, stat=document.getElementById('fStatus').value;
+  const onlyP=document.getElementById('onlyPhone').checked;
+  return LABS.filter(l=>{
+    if(st&&l.state!==st) return false;
+    if(sr&&!l.sources.includes(sr)) return false;
+    if(ct&&l.cert!==ct) return false;
+    if(onlyP&&!l.phone) return false;
+    if(stat){ const c=(PIPE[l.id]&&PIPE[l.id].status)||'new'; if(c!==stat) return false; }
+    if(q&&!((l.name+' '+l.city+' '+l.extId).toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+const MAX_ROWS=500;
+function render(){
+  const res=document.getElementById('results');
+  if(!LABS.length){
+    res.innerHTML=`<div class="panel"><div class="empty">
+      <h3>Nothing loaded yet</h3>
+      <p>Pick a state above and load one or more sources. LabLine ships with zero sample records on purpose — every number here comes from a live federal file.</p>
+      <p>Start with NPPES if you want phone numbers to dial today.</p></div></div>`;
+    return;
+  }
+  const rows=currentFilter(); SHOWN=rows.slice(0,MAX_ROWS);
+  const n=id=>document.getElementById(id);
+  n('sLoaded').textContent=LABS.length.toLocaleString();
+  n('sShown').textContent=rows.length.toLocaleString();
+  n('sPhone').textContent=rows.filter(r=>r.phone).length.toLocaleString();
+  refreshCounts();
+  const more=rows.length>MAX_ROWS?`<p style="font-family:var(--fm);font-size:12px;color:var(--muted);padding:12px 4px">Showing the first ${MAX_ROWS} of ${rows.length.toLocaleString()} matches — narrow the filters to reach the rest.</p>`:'';
+  res.innerHTML=`<div class="tblwrap"><table><thead><tr>
+      <th style="min-width:230px">Organisation</th><th style="min-width:170px">Location</th>
+      <th style="min-width:150px">Category</th><th style="min-width:150px">Phone</th>
+      <th style="min-width:145px">Status</th><th style="min-width:190px">Notes</th>
+    </tr></thead><tbody>${SHOWN.map((l,i)=>rowHTML(l,i)).join('')}</tbody></table></div>${more}`;
+}
+function rowHTML(l,idx){
+  const p=PIPE[l.id]||{status:'new',note:''};
+  const tel=l.phone
+    ? `<a class="tel" href="tel:+1${l.phone}">${fmtPhone(l.phone)}</a>`
+    : `<span class="notel">— <a href="https://www.google.com/search?q=${encodeURIComponent(l.name+' '+l.city+' '+l.state+' phone')}" target="_blank" rel="noopener">look up</a></span>`;
+  return `<tr>
+    <td><span class="lname">${esc(l.name)}</span><span class="lmeta">${esc(l.extId||'')}</span>
+      <div style="margin-top:5px">${l.sources.map(s=>`<span class="pill p-src">${esc(s)}</span>`).join('')}</div></td>
+    <td><span class="addr">${esc(l.addr)}<br>${esc(l.city)}${l.city&&l.state?', ':''}${esc(l.state)} ${esc(l.zip)}</span></td>
+    <td>${l.cert?`<span class="pill ${certClass(l.cert)}">${esc(l.cert)}</span>`:''}</td>
+    <td>${tel}</td>
+    <td><select class="status st-${p.status}" onchange="setStat(${idx},this.value,this)">
+      ${Object.entries(STATUS_LABELS).map(([v,t])=>`<option value="${v}"${p.status===v?' selected':''}>${t}</option>`).join('')}
+    </select></td>
+    <td><textarea class="note" placeholder="Who you spoke to, next step…" onchange="setNote(${idx},this.value)">${esc(p.note)}</textarea></td>
+  </tr>`;
+}
+function refreshCounts(){
+  const c=Object.values(PIPE).filter(p=>['called','followup','interview'].includes(p.status)).length;
+  document.getElementById('sContacted').textContent=c.toLocaleString();
+  document.getElementById('sInterview').textContent=Object.values(PIPE).filter(p=>p.status==='interview').length.toLocaleString();
+}
+function setStat(i,v,el){ const l=SHOWN[i]; if(!l)return;
+  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].status=v;
+  el.className='status st-'+v; savePipe(); refreshCounts(); }
+function setNote(i,v){ const l=SHOWN[i]; if(!l)return;
+  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].note=v; savePipe(); }
+
+/* ---------------- pipeline import / export ---------------- */
+function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function exportPipeline(){
+  const byId=Object.fromEntries(LABS.map(l=>[l.id,l]));
+  const lines=[['record_id','organisation','external_id','address','city','state','zip','phone','category','sources','status','notes'].join(',')];
+  for(const [id,p] of Object.entries(PIPE)){
+    if(p.status==='new'&&!p.note) continue;
+    const l=byId[id]||{};
+    lines.push([id,l.name||'',l.extId||'',l.addr||'',l.city||'',l.state||'',l.zip||'',
+      l.phone?fmtPhone(l.phone):'',l.cert||'',(l.sources||[]).join(' / '),
+      STATUS_LABELS[p.status]||p.status,p.note||''].map(csvCell).join(','));
+  }
+  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='labline-pipeline-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+function importPipeline(){ document.getElementById('pipeFile').click(); }
+function handlePipeImport(e){
+  const f=e.target.files[0]; if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{
+      const rows=parseCSV(rd.result), h=rows[0].map(x=>x.toLowerCase());
+      const iI=h.indexOf('record_id'), iS=h.indexOf('status'), iN=h.indexOf('notes');
+      if(iI<0){ log('No record_id column — is this a LabLine pipeline export?','err'); return; }
+      const rev=Object.fromEntries(Object.entries(STATUS_LABELS).map(([k,v])=>[v.toLowerCase(),k]));
+      let n=0;
+      for(let i=1;i<rows.length;i++){ const id=rows[i][iI]; if(!id)continue;
+        PIPE[id]={status:rev[String(rows[i][iS]||'').toLowerCase()]||'new',note:rows[i][iN]||''}; n++; }
+      savePipe(); render(); log(`Restored ${n} pipeline entries.`,'ok');
+    }catch(err){ log('Could not read that pipeline file.','err'); } };
+  rd.readAsText(f);
+}
+
+/* ---------------- init ---------------- */
+(function(){
+  document.getElementById('gState').innerHTML=STATES.map(s=>`<option${s==='TX'?' selected':''}>${s}</option>`).join('');
+  document.getElementById('btnExport').disabled=Object.keys(PIPE).length===0;
+  render();
+})();
+</script>
+</body>
+</html>
