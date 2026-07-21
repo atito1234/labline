@@ -302,6 +302,8 @@ async function loadCMS(){
     if(!out.length) throw new Error('CMS returned zero rows for '+(st||'all states'));
 
     const pick=(o,keys)=>{ for(const k of keys){ for(const kk of Object.keys(o)){ if(kk.toLowerCase()===k) return o[kk]; } } return ''; };
+    // CRTFCT_TYPE_CD is a numeric code in the live file, not text
+    const CERT_TYPES={'1':'Compliance','2':'Waiver','3':'Accreditation','4':'PPM Microscopy','9':'Registration'};
     let recs=out.map(o=>({
       name:titleCase(pick(o,['fac_name','facility_name','provider_name','name'])),
       extId:String(pick(o,['prvdr_num','provider_number','clia_number','ccn'])||''),
@@ -310,7 +312,7 @@ async function loadCMS(){
       state:String(pick(o,['state_cd','state'])||'').toUpperCase().slice(0,2),
       zip:String(pick(o,['zip_cd','zip','zip_code'])||'').slice(0,5),
       phone:cleanPhone(pick(o,['phne_num','phone_number','phone','telephone'])),
-      cert:titleCase(pick(o,['crtfct_type_cd','certificate_type','cert_type']))
+      cert:(v=>CERT_TYPES[v]||titleCase(v))(String(pick(o,['crtfct_type_cd','certificate_type','cert_type'])||'').trim())
     }));
     if(st) recs=recs.filter(r=>!r.state||r.state===st);   // client-side guard if server filter ignored
     addRecords(recs,'CMS CLIA');
