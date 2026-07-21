@@ -158,9 +158,25 @@ public github.io site remains the free directory.
 (`http://localhost:11434`) and a model name (`ollama list`). LM Studio: enable its local
 server, use `http://localhost:1234/v1`.
 
-**Company websites are not auto-fetched.** Browsers can't read arbitrary third-party sites
-(CORS), so you paste the relevant text (About / Careers / job post) and the local model works
-from that. Server-side fetching would need a backend and is deliberately out of scope here.
+**Web research (optional).** With an Ollama web-search API key (free from `ollama.com` →
+Settings → Keys, pasted into AI settings, stored only in your browser), LabLine can search
+the web for company context and ground each call sheet in cited sources. "Research & Prep"
+runs this over your currently-filtered leads in a capped batch, sequentially, with a live
+progress panel and a Stop button. Note: search queries go through Ollama's cloud service, so
+that part isn't fully offline; if the browser can't reach it (CORS), the batch reports the
+failure and you can switch to a local search source. Without a key, prep still works but is
+role/strategy-only (no live company facts) — the model is instructed not to assert unverified
+specifics.
+
+**Guardrails on research.** The prompt forces the model to ground every specific claim in the
+provided sources, cite them, and mark anything unverified as "not found." On people it is
+restricted to publicly published professional roles (who to ask for) — never personal or
+private details, never invented individuals or dossiers. This is deliberate: it keeps outreach
+credible and consistent with the no-scraped-contacts stance below.
+
+**Direct page fetching is still out of scope client-side.** Arbitrary third-party sites block
+cross-origin reads, so beyond the search API you can also paste page text manually. Full
+server-side fetching would need a backend (a natural paid-tier feature).
 
 **Two scores, kept separate.** *Call Priority* rates how good a target a lab is (reachability,
 test complexity, cross-source confirmation). *Call Readiness* rates how prepared you are

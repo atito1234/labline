@@ -231,6 +231,57 @@
   .prep-lead b{color:var(--ink)}
   .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line-2);border-top-color:var(--fam);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
   @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* ---------- batch research (futuristic) ---------- */
+  .batch{background:linear-gradient(165deg,#0d2233 0%,#081420 60%);color:#eaf4f8;border:1px solid #1b3244;border-radius:18px;
+    width:100%;max-width:680px;box-shadow:0 50px 100px -30px rgba(0,0,0,.7);overflow:hidden;position:relative}
+  .batch::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 80% -10%,rgba(18,179,166,.14),transparent 55%);pointer-events:none}
+  .batch-head{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;border-bottom:1px solid #16293a;position:relative}
+  .batch-kicker{font-family:var(--fm);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--fam);margin-bottom:6px}
+  .batch-head h2{font-size:20px;color:#fff}
+  .batch-body{padding:22px 24px;position:relative}
+  .batch-lead{font-size:14px;color:#bcd0dc;margin:0 0 20px;line-height:1.55}
+  .batch-fields{display:flex;gap:14px;flex-wrap:wrap}
+  .bf{flex:1;min-width:150px;background:rgba(8,20,32,.5);border:1px solid #1b3244;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+  .bf-lab{font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7d94a6}
+  .bf-val{font-family:var(--fd);font-size:26px;font-weight:700;color:#fff}
+  .bf input{background:rgba(8,20,32,.6);border:1px solid #24425a;border-radius:9px;color:#fff;font-size:20px;font-family:var(--fd);font-weight:600;padding:6px 10px;width:100%}
+  .bf input:focus{outline:none;border-color:var(--fam)}
+  .batch-warn{margin-top:16px;font-size:13px;color:#f0c98a;background:rgba(181,129,31,.12);border:1px solid rgba(181,129,31,.35);border-radius:10px;padding:11px 14px;line-height:1.5}
+  .batch-note{margin-top:14px;font-family:var(--fm);font-size:11.5px;color:#7d94a6;line-height:1.6}
+  .batch-note.warn{color:#f0a878}
+
+  .ring-wrap{position:relative;width:120px;height:120px;margin:4px auto 20px}
+  .ring{transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:#16293a;stroke-width:9}
+  .ring-fg{fill:none;stroke:url(#g);stroke-width:9;stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:326.7;transition:stroke-dashoffset .4s ease}
+  .ring-fg{stroke:var(--fam)}
+  .ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring-txt b{font-family:var(--fd);font-size:26px;font-weight:700;color:#fff}
+  .ring-txt span{font-family:var(--fm);font-size:11px;color:#7d94a6;margin-top:2px}
+  .chips{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
+  .chip{background:rgba(8,20,32,.5);border:1px solid #1b3244;border-radius:11px;padding:9px 14px;text-align:center;min-width:64px}
+  .chip span{display:block;font-family:var(--fd);font-weight:700;font-size:18px;color:#fff}
+  .chip small{font-family:var(--fm);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#7d94a6}
+  .feed{max-height:230px;overflow:auto;display:flex;flex-direction:column;gap:2px}
+  .feed-row{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:9px;font-size:13px;transition:background .2s}
+  .feed-row.active{background:rgba(18,179,166,.08)}
+  .feed-row .fd{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:#3a5468}
+  .feed-row.searching .fd{background:var(--amber);animation:fp 1s ease-in-out infinite}
+  .feed-row.drafting .fd{background:var(--fam);animation:fp 1s ease-in-out infinite}
+  .feed-row.done .fd{background:var(--fam)}
+  .feed-row.thin .fd{background:var(--cy5)}
+  .feed-row.failed .fd{background:var(--rox)}
+  @keyframes fp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  .feed-row .fn{color:#dfeaf0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+  .feed-row .fs{font-family:var(--fm);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:#7d94a6;flex:0 0 auto}
+  .batch-foot{display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:16px 24px;border-top:1px solid #16293a;position:relative}
+  .batch-foot .mbtn{background:rgba(8,20,32,.5);border-color:#24425a;color:#dfeaf0}
+  .batch-foot .mbtn:hover{border-color:#3a5f7a;background:rgba(8,20,32,.8)}
+  .batch-foot .mbtn.acc{background:var(--fam);border-color:var(--fam);color:#04211f}
+  .batch-foot .mbtn.acc:hover{background:var(--fam-deep);color:#fff}
+  .batch-msg{margin-right:auto;font-size:12.5px;color:#8aa6b8;align-self:center}
+  .batch-msg.err{color:#f0a878} .batch-msg.ok{color:var(--fam)}
 </style>
 </head>
 <body>
@@ -296,8 +347,9 @@
       </div>
       <div class="hactions">
         <button class="hbtn" onclick="clearData()" id="btnClear" disabled>Clear</button>
-        <button class="hbtn" onclick="importPipeline()">Import pipeline</button>
-        <button class="hbtn acc" onclick="exportPipeline()" id="btnExport" disabled>Export pipeline (CSV)</button>
+        <button class="hbtn" onclick="importPipeline()">Import</button>
+        <button class="hbtn" onclick="exportPipeline()" id="btnExport" disabled>Export CSV</button>
+        <button class="hbtn acc" onclick="openBatch()" id="btnBatch" disabled>✦ Research &amp; Prep</button>
         <input type="file" id="pipeFile" accept=".csv,.json,application/json" hidden onchange="handlePipeImport(event)" />
       </div>
     </div>
@@ -377,7 +429,12 @@
         <div class="hint">The name as your runtime lists it (e.g. <code>ollama list</code>).</div>
       </div>
       <div class="fld">
-        <div class="hint"><b>One-time setup:</b> so the browser may talk to Ollama, start it allowing this origin — e.g. set <code>OLLAMA_ORIGINS=*</code> (or your LabLine URL) before launching <code>ollama serve</code>. This works when you run LabLine locally; the public site can't reach a local model.</div>
+        <label>Web-search key (optional — enables research)</label>
+        <input id="llmWebKey" type="password" placeholder="Ollama API key (ollama.com → Settings → Keys)" autocomplete="off" />
+        <div class="hint">Free from <code>ollama.com</code>. Only used to search the web for company context. Stored in this browser, sent only to Ollama's search API. Leave blank to keep prep offline (no web).</div>
+      </div>
+      <div class="fld">
+        <div class="hint"><b>One-time setup:</b> so the browser may talk to your local model, start Ollama allowing this origin — e.g. set <code>OLLAMA_ORIGINS=*</code> before launching <code>ollama serve</code>. This works when you run LabLine locally; the public site can't reach a local model.</div>
       </div>
     </div>
     <div class="m-foot">
@@ -437,6 +494,59 @@
       <span class="m-msg" id="prepMsg"></span>
       <button class="mbtn" onclick="savePrep()">Save</button>
       <button class="mbtn acc" id="prepGenBtn" onclick="generatePrep()">Generate call sheet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BATCH RESEARCH MODAL (futuristic) ============ -->
+<div class="modal-ov" id="mBatch">
+  <div class="batch">
+    <div class="batch-head">
+      <div>
+        <div class="batch-kicker">◇ grounded research · local model</div>
+        <h2 id="batchTitle">Research &amp; Prep</h2>
+      </div>
+      <button class="m-x" style="color:#8aa6b8" onclick="closeBatch()">×</button>
+    </div>
+
+    <!-- config -->
+    <div class="batch-body" id="batchConfig">
+      <p class="batch-lead">Search the web for each company in your current filter, then draft a guarded, grounded call sheet for each — sequentially, so you stay within limits.</p>
+      <div class="batch-fields">
+        <div class="bf"><span class="bf-lab">In current filter</span><span class="bf-val" id="batchAvail">0</span></div>
+        <div class="bf">
+          <span class="bf-lab">Research how many</span>
+          <input id="batchN" type="number" min="1" max="200" value="25" />
+        </div>
+      </div>
+      <div id="batchWarn" class="batch-warn" hidden></div>
+      <div class="batch-note" id="batchWebNote"></div>
+    </div>
+
+    <!-- progress -->
+    <div class="batch-body" id="batchProgress" hidden>
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+          <circle class="ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"/>
+        </svg>
+        <div class="ring-txt"><b id="ringPct">0%</b><span id="ringCount">0 / 0</span></div>
+      </div>
+      <div class="chips">
+        <div class="chip"><span id="cDone">0</span><small>done</small></div>
+        <div class="chip"><span id="cSheets">0</span><small>sheets</small></div>
+        <div class="chip"><span id="cThin">0</span><small>thin/none</small></div>
+        <div class="chip"><span id="cFail">0</span><small>failed</small></div>
+        <div class="chip"><span id="cElapsed">0s</span><small>elapsed</small></div>
+      </div>
+      <div class="feed" id="batchFeed"></div>
+    </div>
+
+    <div class="batch-foot">
+      <span class="batch-msg" id="batchMsg"></span>
+      <button class="mbtn" id="batchStopBtn" onclick="stopBatch()" hidden>Stop</button>
+      <button class="mbtn" id="batchCloseBtn" onclick="closeBatch()">Cancel</button>
+      <button class="mbtn acc" id="batchStartBtn" onclick="startBatch()">Start research</button>
     </div>
   </div>
 </div>
@@ -516,6 +626,7 @@ function afterLoad(){
   document.getElementById('filterPanel').hidden=LABS.length===0;
   document.getElementById('btnClear').disabled=LABS.length===0;
   buildFilterOptions(); render();
+  if(typeof updateDownloadState==='function') updateDownloadState();
 }
 function clearData(){ LABS=[]; SHOWN=[]; SEEN=new Map(); afterLoad(); log('Results cleared. Your pipeline notes are kept.'); }
 
@@ -890,13 +1001,15 @@ function openSettings(){
   document.getElementById('llmFormat').value=c.format||'ollama';
   document.getElementById('llmEndpoint').value=c.endpoint||'http://localhost:11434';
   document.getElementById('llmModel').value=c.model||'';
+  document.getElementById('llmWebKey').value=c.webKey||'';
   document.getElementById('settingsMsg').textContent='';
   openModal('mSettings');
 }
 function readSettingsForm(){
   return { format:document.getElementById('llmFormat').value,
     endpoint:document.getElementById('llmEndpoint').value.trim().replace(/\/$/,''),
-    model:document.getElementById('llmModel').value.trim() };
+    model:document.getElementById('llmModel').value.trim(),
+    webKey:document.getElementById('llmWebKey').value.trim() };
 }
 function saveSettings(){
   const c=readSettingsForm();
@@ -966,37 +1079,71 @@ function openPrep(idx){
   document.getElementById('prepMsg').textContent='';
   openModal('mPrep');
 }
-function buildPrepMessages(l){
+/* ---- web search (Ollama cloud search API, user's own key) ---- */
+async function webSearch(query,maxResults){
+  const c=getLLM();
+  if(!c.webKey) return [];                                   // no key -> offline prep, no web
+  const res=await fetchT('https://ollama.com/api/web_search',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.webKey},
+    body:JSON.stringify({query:query,max_results:maxResults||5})},20000);
+  if(res.status===401||res.status===403) throw new Error('web-search key rejected ('+res.status+')');
+  if(!res.ok) throw new Error('web search HTTP '+res.status);
+  const j=await res.json();
+  return (j.results||[]).map(r=>({title:r.title||'',url:r.url||'',content:(r.content||'').slice(0,1200)}));
+}
+
+function buildPrepMessages(l,companyText,contact,sources){
   const resume=getResume();
-  const company=document.getElementById('prepCompany').value.trim();
-  const contact=document.getElementById('prepContact').value.trim();
+  const grounded=Array.isArray(sources)&&sources.length;
   const sys="You are an expert cold-calling and career coach helping a scientist land a role at a clinical laboratory, "
-    +"diagnostics, or biotech company. Apply proven cold-calling structure and be concrete, concise, and practical. "
+    +"diagnostics, or biotech company. Apply proven cold-calling structure; be concrete, concise, and practical.\n\n"
+    +"STRICT GUARDRAILS — follow exactly:\n"
+    +"- Ground every specific claim about the company or a person ONLY in the WEB SOURCES provided. If something isn't in the sources, write \"not found\" — never guess or invent it.\n"
+    +"- Cite the source number like [1] after any specific fact.\n"
+    +"- People: only names/titles a company or reputable professional source PUBLISHES, and only to say who to ask for. Never include or infer personal or private details (home, family, personal contact info, anything non-professional). No dossiers, no speculation about individuals.\n"
+    +"- Never fabricate a person, title, credential, or company fact.\n\n"
     +"Return a ready-to-use call sheet in markdown with exactly these sections:\n"
-    +"1. Who to ask for — the right decision-maker to reach (and how to get past the front desk)\n"
+    +"1. Who to ask for — the right role/decision-maker to reach (name + title only if a source lists it), and how to get past the front desk\n"
     +"2. Goal of the call — one concrete objective\n"
     +"3. Opening line — a 1-2 sentence intro said in one breath (who you are + why you're calling)\n"
-    +"4. Talking points — 3 to 5 bullets tying THIS candidate's background to THIS organization\n"
-    +"5. Likely objections & responses — 2 to 3\n"
-    +"6. The ask — the specific next step to request (informational meeting, send CV, follow-up)\n"
-    +"Keep the whole call under 60 seconds of talking. Never invent facts about the candidate or company.";
+    +"4. What's relevant about them — 2-4 bullets of call-useful company context, each cited [n]; write \"limited public info found\" if the sources are thin\n"
+    +"5. Talking points — 3 to 5 bullets tying THIS candidate's background to THIS organization\n"
+    +"6. Likely objections & responses — 2 to 3\n"
+    +"7. The ask — the specific next step to request\n"
+    +"8. Sources — list the numbered source URLs you used\n"
+    +"Keep the call itself under 60 seconds of talking.";
+  let src='(no web sources — do NOT state specific company/person facts; give a role-based, generic-but-tailored sheet and note that web research was unavailable)';
+  if(grounded) src=sources.map((s,i)=>`[${i+1}] ${s.title} — ${s.url}\n${s.content}`).join('\n\n');
   const usr="TARGET ORGANIZATION (from a federal directory):\n"
     +`- Name: ${l.name}\n- Location: ${l.city}, ${l.state} ${l.zip}\n- Category/certificate: ${l.cert||'unknown'}\n`
     +`- Listed in: ${(l.sources||[]).join(', ')}\n- Phone on file: ${l.phone?fmtPhone(l.phone):'none'}\n\n`
-    +`WHO I'M TRYING TO REACH: ${contact||'(not specified — suggest the most likely decision-maker)'}\n\n`
-    +`COMPANY INFO I PASTED (may be empty):\n${company||'(none provided)'}\n\n`
-    +`MY RESUME:\n${resume||'(no resume on file — keep talking points generic but still tailored to this kind of lab)'}\n\n`
-    +"Write the call sheet.";
+    +`WHO I'M TRYING TO REACH: ${contact||'(not specified — suggest the most likely decision-maker role)'}\n\n`
+    +`WEB SOURCES:\n${src}\n\n`
+    +(companyText?`ALSO, INFO THE USER PASTED:\n${companyText}\n\n`:'')
+    +`MY RESUME:\n${resume||'(no resume on file — keep talking points tailored to this kind of lab)'}\n\n`
+    +"Write the call sheet, honoring the guardrails.";
   return [{role:'system',content:sys},{role:'user',content:usr}];
+}
+async function draftForLead(l,companyText,contact,onState){
+  let sources=[];
+  const c=getLLM();
+  if(c.webKey){ if(onState)onState('searching'); sources=await webSearch(`${l.name} ${l.city} ${l.state} laboratory diagnostics biotech`,5); }
+  if(onState)onState('drafting');
+  const text=await llmChat(buildPrepMessages(l,companyText,contact,sources));
+  return {text,sources};
 }
 async function generatePrep(){
   const l=SHOWN.find(x=>x.id===PREP_ID)||LABS.find(x=>x.id===PREP_ID); if(!l) return;
   const btn=document.getElementById('prepGenBtn'), out=document.getElementById('prepOut');
-  btn.disabled=true; out.innerHTML='<span class="spin"></span>Drafting your call sheet…';
-  document.getElementById('prepMsg').textContent='';
+  btn.disabled=true; document.getElementById('prepMsg').textContent='';
+  const companyText=document.getElementById('prepCompany').value.trim();
+  const contact=document.getElementById('prepContact').value.trim();
   try{
-    const text=await llmChat(buildPrepMessages(l));
-    out.textContent=text||'(the model returned nothing — try a different model)';
+    const r=await draftForLead(l,companyText,contact,st=>{
+      out.innerHTML='<span class="spin"></span>'+(st==='searching'?'Searching the web for context…':'Drafting your call sheet…');
+    });
+    out.textContent=r.text||'(the model returned nothing — try a different model)';
+    if(r.sources.length) msg('prepMsg',r.sources.length+' web sources used','ok');
   }catch(err){
     out.textContent='Fill in what you have, then Generate.';
     msg('prepMsg','Couldn’t generate: '+err.message,'err');
@@ -1019,6 +1166,7 @@ function updateDownloadState(){
   const anyPipe=hasPipeContent(), g=id=>document.getElementById(id);
   ['dlCsv','dlMd','btnExport'].forEach(i=>{ if(g(i)) g(i).disabled=!anyPipe; });
   if(g('dlJson')) g('dlJson').disabled=!(anyPipe||getResume()||LABS.length);
+  if(g('btnBatch')) g('btnBatch').disabled=!LABS.length;
 }
 function download(name,text,type){
   const blob=new Blob([text],{type:type||'text/plain;charset=utf-8'});
@@ -1053,6 +1201,92 @@ function downloadBackup(){
   const data={ app:'LabLine', kind:'backup', version:1, exported:new Date().toISOString().slice(0,10),
     resume:getResume(), pipeline:PIPE, leads };
   download('labline-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(data,null,2),'application/json');
+}
+
+/* ---- batch research & prep ---- */
+const RING_C=326.7;
+let BATCH={running:false,stop:false,pool:[],pool2:[],done:0,drafted:0,thin:0,failed:0,t0:0};
+function openBatch(){
+  if(!LABS.length) return;
+  BATCH.pool=currentFilter();
+  document.getElementById('batchAvail').textContent=BATCH.pool.length.toLocaleString();
+  const n=document.getElementById('batchN');
+  n.max=Math.min(200,BATCH.pool.length||1); n.value=Math.min(25,BATCH.pool.length||1);
+  const warn=document.getElementById('batchWarn');
+  n.oninput=()=>{ const v=+n.value; if(v>50){ warn.hidden=false;
+      warn.textContent='Large run: '+v+' companies, roughly '+Math.ceil(v*8/60)+'–'+Math.ceil(v*22/60)+' min and '+v+' searches of your quota.'; }
+    else warn.hidden=true; };
+  const c=getLLM(), note=document.getElementById('batchWebNote');
+  if(c.webKey){ note.className='batch-note'; note.textContent='Web research: ON. Guardrails force cited, professional-only facts — no personal dossiers, no invented people.'; }
+  else { note.className='batch-note warn'; note.textContent='No web-search key — sheets will be role & strategy only (no live company facts). Add a key in AI settings to enable research.'; }
+  document.getElementById('batchConfig').hidden=false;
+  document.getElementById('batchProgress').hidden=true;
+  document.getElementById('batchStartBtn').hidden=false; document.getElementById('batchStartBtn').disabled=!(c.endpoint&&c.model);
+  document.getElementById('batchCloseBtn').hidden=false; document.getElementById('batchCloseBtn').textContent='Cancel';
+  document.getElementById('batchStopBtn').hidden=true; document.getElementById('batchWarn').hidden=true;
+  document.getElementById('batchMsg').textContent=(c.endpoint&&c.model)?'':'Connect your local model first (AI settings).';
+  document.getElementById('batchMsg').className='batch-msg'+((c.endpoint&&c.model)?'':' err');
+  document.getElementById('batchTitle').textContent='Research & Prep';
+  openModal('mBatch');
+}
+function closeBatch(){ if(BATCH.running) BATCH.stop=true; closeModal('mBatch'); }
+function stopBatch(){ BATCH.stop=true; const m=document.getElementById('batchMsg'); m.className='batch-msg'; m.textContent='Stopping after the current company…'; }
+function feedRow(i,name){ return `<div class="feed-row queued" id="fr${i}"><span class="fd"></span><span class="fn">${esc(name)}</span><span class="fs" id="fs${i}">queued</span></div>`; }
+function setRow(i,state,label){ const r=document.getElementById('fr'+i); if(!r)return;
+  r.className='feed-row '+state+((state==='searching'||state==='drafting')?' active':'');
+  const s=document.getElementById('fs'+i); if(s) s.textContent=label||state;
+  if(state==='searching'||state==='drafting'){ try{r.scrollIntoView({block:'nearest'});}catch(e){} } }
+function updRing(){
+  const total=BATCH.pool2.length, done=BATCH.done, pct=total?done/total:0;
+  document.getElementById('ringFg').style.strokeDashoffset=(RING_C*(1-pct)).toFixed(1);
+  document.getElementById('ringPct').textContent=Math.round(pct*100)+'%';
+  document.getElementById('ringCount').textContent=done+' / '+total;
+  document.getElementById('cDone').textContent=done;
+  document.getElementById('cSheets').textContent=BATCH.drafted;
+  document.getElementById('cThin').textContent=BATCH.thin;
+  document.getElementById('cFail').textContent=BATCH.failed;
+}
+async function startBatch(){
+  const c=getLLM();
+  if(!c.endpoint||!c.model){ const m=document.getElementById('batchMsg'); m.className='batch-msg err'; m.textContent='Connect your local model first (AI settings).'; return; }
+  const n=Math.max(1,Math.min(200,+document.getElementById('batchN').value||25));
+  const pool=(BATCH.pool||[]).slice(0,n); if(!pool.length) return;
+  Object.assign(BATCH,{pool2:pool,running:true,stop:false,done:0,drafted:0,thin:0,failed:0,t0:Date.now()});
+  document.getElementById('batchConfig').hidden=true;
+  document.getElementById('batchProgress').hidden=false;
+  document.getElementById('batchStartBtn').hidden=true;
+  document.getElementById('batchCloseBtn').hidden=true;
+  document.getElementById('batchStopBtn').hidden=false;
+  document.getElementById('batchTitle').textContent='Researching '+pool.length+' companies';
+  document.getElementById('batchFeed').innerHTML=pool.map((l,i)=>feedRow(i,l.name)).join('');
+  updRing();
+  const timer=setInterval(()=>{ document.getElementById('cElapsed').textContent=Math.round((Date.now()-BATCH.t0)/1000)+'s'; },1000);
+  let netFails=0;
+  for(let i=0;i<pool.length;i++){
+    if(BATCH.stop) break;
+    const l=pool[i];
+    try{
+      const r=await draftForLead(l,'','',st=>setRow(i,st,st));
+      const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''};
+      p.prep=r.text||''; p.prepAt=new Date().toISOString().slice(0,10);
+      if(r.sources.length){ BATCH.drafted++; setRow(i,'done','done · '+r.sources.length+' src'); }
+      else { BATCH.thin++; setRow(i,'thin','no web'); }
+      netFails=0;
+    }catch(err){
+      BATCH.failed++; setRow(i,'failed',(err.message||'failed').slice(0,20));
+      if(/HTTP|rejected|Failed to fetch|timed out|NetworkError|Load failed/i.test(err.message||'')) netFails++;
+      if(netFails>=3){ const m=document.getElementById('batchMsg'); m.className='batch-msg err';
+        m.textContent='Web search failed 3× — likely CORS or a bad key. Stopping. Test the key in AI settings, or switch to a local search source.'; BATCH.stop=true; }
+    }
+    BATCH.done++; updRing(); savePipe();
+    await new Promise(res=>setTimeout(res,350));
+  }
+  clearInterval(timer); BATCH.running=false; render();
+  document.getElementById('batchStopBtn').hidden=true;
+  document.getElementById('batchCloseBtn').hidden=false; document.getElementById('batchCloseBtn').textContent='Done';
+  const m=document.getElementById('batchMsg');
+  if(!m.textContent||m.className.indexOf('err')<0){ m.className='batch-msg ok';
+    m.textContent=BATCH.done+' processed · '+BATCH.drafted+' web-grounded · '+BATCH.thin+' offline · '+BATCH.failed+' failed'; }
 }
 
 /* ---------------- init ---------------- */
