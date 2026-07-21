@@ -29,6 +29,13 @@ Useful columns: `FAC_NAME`, `PRVDR_NUM`, `ST_ADR`, `CITY_NAME`, `STATE_CD`, `ZIP
 `CRTFCT_TYPE_CD`. Column names have changed between quarterly releases, so LabLine
 matches them case-insensitively against a list of aliases rather than by exact name.
 
+**Verified live 2026-07-21:** the endpoint responds 200 and reflects the request `Origin`
+in `Access-Control-Allow-Origin`, so it works from the browser. Field names are uppercase
+(`FAC_NAME`, `PHNE_NUM`, …). `CRTFCT_TYPE_CD` arrives as a code — 1 Compliance, 2 Waiver,
+3 Accreditation, 4 PPM Microscopy, 9 Registration — which LabLine maps to labels. The file
+also contains historical records: in a 2,000-row TX sample, 73% carried a non-zero
+`PGM_TRMNTN_CD` (terminated), so LabLine requests `filter[PGM_TRMNTN_CD]=00` (active only).
+
 **Certificate types that matter for a director track:** Certificate of Compliance and
 Certificate of Accreditation indicate labs running non-waived testing. Under 42 CFR
 §493.1443, high-complexity director eligibility requires an earned doctoral degree in a
@@ -63,6 +70,14 @@ Physiological Laboratory, Clinical Pathology.
 **Note:** individual-provider records (`NPI-1`) contain personal data. LabLine deliberately
 queries organisations only.
 
+**CORS limitation (verified 2026-07-21):** the NPPES API returns HTTP 200 with the expected
+JSON from curl/PowerShell/server-side code, but it sends no `Access-Control-Allow-Origin`
+header — even when the request carries an `Origin`. Browsers therefore block every response,
+so the in-app NPPES loader cannot work from a web page today. The loader is kept in place
+and reports this specific failure in the log panel rather than being removed, in case NPPES
+adds CORS later. Workarounds: the in-app CSV fallback, or NPPES's monthly full-file download
+at <https://download.cms.gov/nppes/NPI_Files.html>.
+
 ---
 
 ## 3. openFDA Device Registration & Listing
@@ -77,6 +92,9 @@ https://api.fda.gov/device/registrationlisting.json?search=registration.state_co
 - No API key needed at low volume; rate limits apply above that.
 - Returns HTTP 404 rather than an empty array when results are exhausted.
 - Does **not** publish phone numbers — names and addresses only.
+- Verified live 2026-07-21: responds 200 with `Access-Control-Allow-Origin: *`, so it
+  works from the browser. For US establishments the zip is in `registration.zip_code`;
+  `registration.postal_code` is an empty string.
 
 ---
 

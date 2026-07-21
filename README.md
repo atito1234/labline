@@ -59,6 +59,9 @@ you. Copy `loadNPI()` as a template.
 
 ## Limits, stated plainly
 
+- The NPPES API does not send CORS headers, so browsers block it — the in-app NPPES
+  loader currently fails with an explanation. Use the CSV fallback; details in
+  `docs/DATA-SOURCES.md`.
 - Federal files refresh quarterly. Verify a number before you dial it.
 - Phone coverage is uneven. Filter to "only rows with a phone" when you are making calls.
 - These are facility main lines — business contact data. Call manually. Do not autodial;

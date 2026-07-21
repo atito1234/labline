@@ -334,7 +334,15 @@ async function loadNPI(){
       for(let skip=0; skip<1000; skip+=200){
         const u=`https://npiregistry.cms.hhs.gov/api/?version=2.1&enumeration_type=NPI-2&state=${st}`
           +`&taxonomy_description=${encodeURIComponent(tax)}&limit=200&skip=${skip}`;
-        const res=await fetch(u);
+        let res;
+        try{ res=await fetch(u); }
+        catch(e){
+          // the NPPES API sends no Access-Control-Allow-Origin header (verified 2026-07),
+          // so browsers block the response even though the endpoint itself is up
+          throw new Error('blocked by the browser. The NPPES API does not send CORS headers, '
+            +'so no web page can read it directly — this is an NPPES limitation, not an outage. '
+            +'Use the CSV fallback below, or see docs/DATA-SOURCES.md for the downloadable NPPES file.');
+        }
         if(!res.ok) throw new Error('NPPES HTTP '+res.status);
         const j=await res.json();
         const results=j.results||[];
