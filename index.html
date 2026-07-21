@@ -222,7 +222,7 @@ const CMS_ENDPOINTS=[
   "https://data.cms.gov/data-api/v1/dataset/a1831002-8e90-4ff5-a811-0ea4bed3c4ce/data"
 ];
 
-let LABS=[], SHOWN=[], SEEN=new Set();
+let LABS=[], SHOWN=[], SEEN=new Map();   // dedupe key -> record, so merges stay O(1)
 let PIPE=loadPipe();
 
 /* ---------------- storage ---------------- */
@@ -257,12 +257,12 @@ function addRecords(recs,sourceName){
     if(!r.name) continue;
     const k=dedupeKey(r);
     if(SEEN.has(k)){
-      const ex=LABS.find(x=>dedupeKey(x)===k);
-      if(ex && !ex.phone && r.phone) ex.phone=r.phone;          // enrich missing phones
-      if(ex && !ex.sources.includes(sourceName)) ex.sources.push(sourceName);
+      const ex=SEEN.get(k);
+      if(!ex.phone && r.phone) ex.phone=r.phone;                // enrich missing phones
+      if(!ex.sources.includes(sourceName)) ex.sources.push(sourceName);
       continue;
     }
-    SEEN.add(k); r.sources=[sourceName]; r.id=r.id||k; LABS.push(r); added++;
+    SEEN.set(k,r); r.sources=[sourceName]; r.id=r.id||k; LABS.push(r); added++;
   }
   log(`${sourceName}: ${added} new, ${recs.length-added} merged into existing rows`, 'ok');
   afterLoad();
@@ -272,7 +272,7 @@ function afterLoad(){
   document.getElementById('btnClear').disabled=LABS.length===0;
   buildFilterOptions(); render();
 }
-function clearData(){ LABS=[]; SHOWN=[]; SEEN=new Set(); afterLoad(); log('Results cleared. Your pipeline notes are kept.'); }
+function clearData(){ LABS=[]; SHOWN=[]; SEEN=new Map(); afterLoad(); log('Results cleared. Your pipeline notes are kept.'); }
 
 /* ---------------- source A: CMS CLIA ---------------- */
 async function loadCMS(){
