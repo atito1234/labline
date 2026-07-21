@@ -385,6 +385,32 @@
   .board .tcall-wrap{display:flex;flex-direction:column;gap:4px}
   .board .btn-callm{font-size:11px;font-weight:600;padding:4px 10px;border-radius:14px;background:var(--fam);color:#04211f;text-decoration:none;text-align:center;border:1px solid var(--fam)}
   .board .btn-callm:hover{background:var(--fam-deep);color:#fff}
+
+  /* ---------- My board (grouped by status) ---------- */
+  body.boardmode .filterbar .pill-sel,
+  body.boardmode .filterbar .phone-toggle,
+  body.boardmode .filterbar .resetlink{display:none}   /* board uses only the search + view toggle */
+  #boardGroups{display:flex;flex-direction:column;gap:22px}
+  .bgroup{background:transparent}
+  .bghead{display:flex;align-items:center;gap:9px;font-family:var(--fd);font-weight:600;font-size:15px;margin-bottom:11px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  .bghead .bgdot{width:10px;height:10px;border-radius:50%;background:var(--muted-2)}
+  .bghead.st-called .bgdot{background:var(--fam-deep)} .bghead.st-followup .bgdot{background:var(--rox)}
+  .bghead.st-interview .bgdot{background:var(--cy5)} .bghead.st-no .bgdot{background:#9aa8b2} .bghead.st-new .bgdot{background:var(--muted-2)}
+  .bghead.st-called{color:var(--fam-deep)} .bghead.st-followup{color:var(--rox)} .bghead.st-interview{color:var(--cy5)}
+  .bgn{font-family:var(--fm);font-size:12px;background:var(--paper-2);border:1px solid var(--line);border-radius:20px;padding:1px 9px;color:var(--muted);font-weight:400}
+  .bcard{display:grid;grid-template-columns:1fr;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .bcard:hover{border-color:var(--line-2)}
+  .bc-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .bc-name{font-family:var(--fd);font-weight:600;font-size:15.5px}
+  .bc-when{font-family:var(--fm);font-size:11px;color:var(--muted-2);white-space:nowrap}
+  .bc-loc{font-size:12.5px;color:var(--muted)}
+  .bc-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:2px}
+  .bc-row .tel-lnk{font-family:var(--fm);color:var(--fam-deep);font-weight:600;text-decoration:none}
+  .bc-row .tlook{font-size:12.5px;color:var(--cy5);text-decoration:none}
+  .bc-contact{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13.5px;background:#fff}
+  .bc-contact:focus{outline:none;border-color:var(--fam);box-shadow:0 0 0 3px var(--fam-glow)}
+  .bc-note{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13.5px;min-height:44px;resize:vertical;line-height:1.45;font-family:var(--fb);background:#fff}
+  .bc-note:focus{outline:none;border-color:var(--fam);box-shadow:0 0 0 3px var(--fam-glow)}
 </style>
 </head>
 <body>
@@ -403,6 +429,7 @@
     <nav class="snav">
       <a class="home" href="../"><span class="ic">←</span> Back to home</a>
       <a class="active" href="#"><span class="ic">▤</span> Directory</a>
+      <a href="#" onclick="setView('board');return false"><span class="ic">◉</span> My board</a>
       <a href="#" onclick="openActivity();return false"><span class="ic">◷</span> Activity log</a>
       <a href="../docs/DATA-SOURCES.md"><span class="ic">◫</span> Data sources</a>
     </nav>
@@ -474,7 +501,7 @@
       <label class="phone-toggle"><input type="checkbox" id="onlyPhone" onchange="render()" /> Has phone</label>
       <label class="phone-toggle"><input type="checkbox" id="onlyHC" onchange="render()" /> High-complexity</label>
       <button class="resetlink" onclick="resetFilters()">Reset</button>
-      <div class="viewtog"><button class="vw on" id="vwCards" onclick="setView('cards')">▤ Cards</button><button class="vw" id="vwTable" onclick="setView('table')">▦ Table</button></div>
+      <div class="viewtog"><button class="vw on" id="vwCards" onclick="setView('cards')">▤ Cards</button><button class="vw" id="vwTable" onclick="setView('table')">▦ Table</button><button class="vw" id="vwBoard" onclick="setView('board')">◉ My board</button></div>
     </div>
 
     <div class="selbar" id="selBar" hidden>
@@ -1016,6 +1043,7 @@ const MAX_ROWS=500;
 function render(){
   const res=document.getElementById('results');
   const mc=document.getElementById('mcount');
+  if(VIEW==='board'){ renderBoard(); return; }
   if(!LABS.length){
     res.innerHTML=`<div class="empty">
       <div class="empty-ic">🔬</div>
@@ -1038,8 +1066,64 @@ function render(){
   res.innerHTML=body+more;
 }
 function setView(v){ VIEW=v;
-  const c=document.getElementById('vwCards'), t=document.getElementById('vwTable');
-  if(c) c.classList.toggle('on',v==='cards'); if(t) t.classList.toggle('on',v==='table'); render(); }
+  [['vwCards','cards'],['vwTable','table'],['vwBoard','board']].forEach(([id,name])=>{ const b=document.getElementById(id); if(b) b.classList.toggle('on',v===name); });
+  // board always shows the search bar (it works from your saved pipeline, no directory load needed)
+  document.getElementById('filterPanel').hidden = v!=='board' && LABS.length===0;
+  document.body.classList.toggle('boardmode', v==='board');
+  render();
+}
+
+/* ---------------- My board: pipeline grouped by status ---------------- */
+const BOARD_ORDER=['followup','interview','called','new','no'];
+function renderBoard(){
+  const res=document.getElementById('results'), mc=document.getElementById('mcount');
+  const ids=Object.keys(PIPE).filter(id=>{ const p=PIPE[id]; return p&&((p.status&&p.status!=='new')||p.note||p.contact||p.prep); });
+  if(mc) mc.textContent=ids.length+' labs on your board';
+  const n=id=>document.getElementById(id);
+  if(LABS.length){ const rows=currentFilter(); n('sLoaded').textContent=LABS.length.toLocaleString(); n('sShown').textContent=rows.length.toLocaleString(); n('sPhone').textContent=rows.filter(r=>r.phone).length.toLocaleString(); }
+  refreshCounts();
+  if(!ids.length){ res.innerHTML=`<div class="empty"><div class="empty-ic">◉</div><h3>Your board is empty</h3>
+    <p>As you set a status, add a note, or save a contact on any lab, it lands here — grouped by status, ready to work each day.</p>
+    <p class="empty-hint">Load a state in the Directory and start calling; the board fills itself.</p></div>`; return; }
+  res.innerHTML='<div id="boardGroups"></div>';
+  renderBoardGroups();
+}
+function renderBoardGroups(){
+  const wrap=document.getElementById('boardGroups'); if(!wrap) return;
+  const q=(document.getElementById('q').value||'').trim().toLowerCase();
+  const groups={}; BOARD_ORDER.forEach(s=>groups[s]=[]);
+  for(const [id,p] of Object.entries(PIPE)){
+    if(!((p.status&&p.status!=='new')||p.note||p.contact||p.prep)) continue;
+    const l=leadOf(id);
+    if(q && !((l.name+' '+(l.city||'')+' '+(p.contact||'')+' '+(p.note||'')).toLowerCase().includes(q))) continue;
+    const s=p.status||'new'; (groups[s]||(groups[s]=[])).push({id,p,l});
+  }
+  let html='';
+  for(const s of BOARD_ORDER){
+    const items=groups[s]||[]; if(!items.length) continue;
+    html+=`<div class="bgroup"><div class="bghead st-${s}"><span class="bgdot"></span>${esc(STATUS_LABELS[s]||s)} <span class="bgn">${items.length}</span></div>`;
+    html+=items.map(it=>bcard(it.id,it.p,it.l)).join('');
+    html+='</div>';
+  }
+  wrap.innerHTML=html||'<div class="act-empty">Nothing matches your search.</div>';
+}
+function bcard(id,p,l){
+  const tel=l.phone
+    ? `<a class="tel-lnk" href="tel:+1${l.phone}" onclick="bDial(&quot;${escAttr(id)}&quot;)">☎ ${fmtPhone(l.phone)}</a>`
+    : `<a class="tlook" href="https://www.google.com/search?q=${encodeURIComponent((l.name||'')+' '+(l.city||'')+' '+(l.state||'')+' phone')}" target="_blank" rel="noopener">look up ↗</a>`;
+  const la=(function(){ for(let k=ACT.length-1;k>=0;k--) if(ACT[k].id===id) return relTime(new Date(ACT[k].t)); return ''; })();
+  return `<div class="bcard">
+    <div class="bc-top"><div class="bc-name">${esc(l.name||id)}</div>${la?`<span class="bc-when">${esc(la)}</span>`:''}</div>
+    <div class="bc-loc">${esc(l.city||'')}${l.city&&l.state?', ':''}${esc(l.state||'')} ${esc(l.zip||'')}${l.cert?` · ${esc(l.cert)}`:''}</div>
+    <div class="bc-row">${tel}
+      <select class="status st-${p.status}" onchange="bStat(&quot;${escAttr(id)}&quot;,this.value)">
+        ${Object.entries(STATUS_LABELS).map(([v,t])=>`<option value="${v}"${p.status===v?' selected':''}>${t}</option>`).join('')}
+      </select></div>
+    <input class="bc-contact" value="${esc(p.contact||'')}" placeholder="Contact / who you spoke to" onchange="bContact(&quot;${escAttr(id)}&quot;,this.value)" />
+    <textarea class="bc-note" placeholder="Notes, callback #, outcome…" onchange="bNote(&quot;${escAttr(id)}&quot;,this.value)">${esc(p.note||'')}</textarea>
+  </div>`;
+}
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function tableHTML(rows){
   return `<div class="tblwrap"><table class="board"><thead><tr>
     <th class="tsel"></th><th>Organisation</th><th>Location</th><th>Phone</th><th>Priority</th><th>Status</th><th>Contact / spoke with</th><th>Notes &amp; outcome</th><th>Last activity</th>
@@ -1115,14 +1199,25 @@ function refreshCounts(){
   document.getElementById('sContacted').textContent=c.toLocaleString();
   document.getElementById('sInterview').textContent=Object.values(PIPE).filter(p=>p.status==='interview').length.toLocaleString();
 }
+/* snapshot the lab's facts into the pipeline entry, so the board works on a
+   fresh session without reloading any federal source */
+function labSnap(l){ return {name:l.name,city:l.city,state:l.state,zip:l.zip,addr:l.addr||'',phone:l.phone||'',cert:l.cert||'',extId:l.extId||'',sources:l.sources||[]}; }
+function touch(l){ const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; p.lab=labSnap(l); return p; }
+function leadOf(id){ const live=SEEN.get&&SEEN.get(id); if(live) return live;
+  const p=PIPE[id]; return p&&p.lab?{id,...p.lab}:{id,name:id}; }
 function setStat(i,v,el){ const l=SHOWN[i]; if(!l)return;
-  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].status=v;
-  el.className='status st-'+v; savePipe(); refreshCounts(); logAct(l,'Status → '+(STATUS_LABELS[v]||v)); }
+  touch(l).status=v;
+  if(el) el.className='status st-'+v; savePipe(); refreshCounts(); logAct(l,'Status → '+(STATUS_LABELS[v]||v)); }
 function setNote(i,v){ const l=SHOWN[i]; if(!l)return;
-  const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; const changed=p.note!==v; p.note=v; savePipe();
+  const p=touch(l); const changed=p.note!==v; p.note=v; savePipe();
   if(changed) logAct(l,'Note updated',v||''); }
 function setContact(i,v){ const l=SHOWN[i]; if(!l)return;
-  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].contact=v; savePipe(); }
+  touch(l).contact=v; savePipe(); }
+/* id-based versions used by the board (work without loaded directory data) */
+function bStat(id,v){ const p=PIPE[id]; if(!p)return; p.status=v; savePipe(); refreshCounts(); logAct(leadOf(id),'Status → '+(STATUS_LABELS[v]||v)); renderBoardGroups(); }
+function bNote(id,v){ const p=PIPE[id]; if(!p)return; const ch=p.note!==v; p.note=v; savePipe(); if(ch) logAct(leadOf(id),'Note updated',v||''); }
+function bContact(id,v){ const p=PIPE[id]; if(!p)return; p.contact=v; savePipe(); }
+function bDial(id){ const l=leadOf(id); logAct(l,'Dialed',l.phone?fmtPhone(l.phone):''); }
 
 /* ---------------- pipeline import / export ---------------- */
 function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
@@ -1412,7 +1507,7 @@ async function generatePrep(){
     const r=await draftForLead(l,companyText,contact,
       st=>{ if(onThis()) out().innerHTML='<span class="spin"></span>'+(st==='searching'?'Searching the web for context…':'Drafting your call sheet…'); },
       txt=>{ if(onThis()) out().textContent=txt; });   // live tokens
-    const pp=PIPE[id]=PIPE[id]||{status:'new',note:''};
+    const pp=touch(l);
     pp.prep=r.text||''; pp.prepAt=new Date().toISOString().slice(0,10);
     savePipe();
     if(onThis()){ out().textContent=r.text||'(the model returned nothing — try a different model)'; if(r.sources.length) msg('prepMsg',r.sources.length+' web sources used','ok'); }
@@ -1423,7 +1518,7 @@ async function generatePrep(){
 function savePrep(){
   const l=SHOWN.find(x=>x.id===PREP_ID)||LABS.find(x=>x.id===PREP_ID); if(!l) return;
   const out=document.getElementById('prepOut').textContent.trim();
-  const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''};
+  const p=touch(l);
   p.contact=document.getElementById('prepContact').value.trim();
   p.company=document.getElementById('prepCompany').value.trim();
   if(!PREPJOBS.has(l.id) && out && !out.startsWith('Fill in what you have') && !out.startsWith('Working') && !out.startsWith('Searching') && !out.startsWith('Drafting')){
@@ -1649,7 +1744,7 @@ async function startBatch(){
     const l=pool[i];
     try{
       const r=await draftForLead(l,'','',st=>setRow(i,st,st),undefined,BATCH.community);
-      const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''};
+      const p=touch(l);
       if(BATCH.community){ p.profile=r.text||''; p.profileSources=r.sources.map(s=>s.url); p.profileAt=new Date().toISOString().slice(0,10); }
       else { p.prep=r.text||''; p.prepAt=new Date().toISOString().slice(0,10); }
       if(r.sources.length){ BATCH.drafted++; setRow(i,'done','done · '+r.sources.length+' src'); }
