@@ -384,7 +384,7 @@ async function loadFDA(){
           addr:titleCase([reg.address_line_1,reg.address_line_2].filter(Boolean).join(' ')),
           city:titleCase(reg.city||''),
           state:String(reg.state_code||'').toUpperCase().slice(0,2),
-          zip:String(reg.postal_code||'').slice(0,5),
+          zip:String(reg.zip_code||reg.postal_code||'').slice(0,5),  // US records use zip_code; postal_code is empty
           phone:'',                                     // openFDA does not publish phone numbers
           cert:prods[0]?('Device: '+titleCase(prods[0])):'Registered device firm'
         });
