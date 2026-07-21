@@ -282,6 +282,22 @@
   .batch-foot .mbtn.acc:hover{background:var(--fam-deep);color:#fff}
   .batch-msg{margin-right:auto;font-size:12.5px;color:#8aa6b8;align-self:center}
   .batch-msg.err{color:#f0a878} .batch-msg.ok{color:var(--fam)}
+
+  /* floating progress dock (batch running in background) */
+  .batch-dock{position:fixed;bottom:22px;right:22px;z-index:90;display:flex;align-items:center;gap:12px;
+    background:linear-gradient(160deg,#123247 0%,#081420 100%);
+    border:1px solid #1b3244;border-radius:14px;padding:11px 16px 11px 12px;cursor:pointer;
+    box-shadow:0 18px 40px -14px rgba(0,0,0,.6);transition:transform .15s,box-shadow .15s;animation:dockglow 2.6s ease-in-out infinite}
+  .batch-dock:hover{transform:translateY(-2px);box-shadow:0 24px 50px -16px rgba(0,0,0,.7)}
+  @keyframes dockglow{0%,100%{box-shadow:0 18px 40px -14px rgba(0,0,0,.6)}50%{box-shadow:0 18px 44px -12px rgba(18,179,166,.35)}}
+  .dock-ring{position:relative;width:40px;height:40px;flex:0 0 auto}
+  .dock-ring svg{transform:rotate(-90deg)}
+  .dr-bg{fill:none;stroke:#16293a;stroke-width:5}
+  .dr-fg{fill:none;stroke:var(--fam);stroke-width:5;stroke-linecap:round;stroke-dasharray:100.5;stroke-dashoffset:100.5;transition:stroke-dashoffset .4s ease}
+  .dock-ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:10px;color:#eaf4f8;font-weight:500}
+  .dock-txt{display:flex;flex-direction:column;line-height:1.25;color:#eaf4f8}
+  .dock-txt b{font-family:var(--fd);font-size:13px;font-weight:600}
+  .dock-txt span{font-family:var(--fm);font-size:10.5px;color:#8aa6b8}
 </style>
 </head>
 <body>
@@ -556,10 +572,20 @@
     <div class="batch-foot">
       <span class="batch-msg" id="batchMsg"></span>
       <button class="mbtn" id="batchStopBtn" onclick="stopBatch()" hidden>Stop</button>
+      <button class="mbtn" id="batchBgBtn" onclick="minimizeBatch()" hidden>Run in background</button>
       <button class="mbtn" id="batchCloseBtn" onclick="closeBatch()">Cancel</button>
       <button class="mbtn acc" id="batchStartBtn" onclick="startBatch()">Start research</button>
     </div>
   </div>
+</div>
+
+<!-- floating progress dock (shown when a batch runs minimized) -->
+<div class="batch-dock" id="batchDock" hidden onclick="reopenBatch()" title="View research progress">
+  <div class="dock-ring">
+    <svg viewBox="0 0 40 40" width="40" height="40"><circle class="dr-bg" cx="20" cy="20" r="16"/><circle class="dr-fg" id="dockRing" cx="20" cy="20" r="16"/></svg>
+    <span id="dockPct">0%</span>
+  </div>
+  <div class="dock-txt"><b id="dockTitle">Researching…</b><span id="dockSub">0 / 0</span></div>
 </div>
 
 <script>
@@ -1225,6 +1251,7 @@ const RING_C=326.7;
 let BATCH={running:false,stop:false,pool:[],pool2:[],done:0,drafted:0,thin:0,failed:0,t0:0};
 function openBatch(){
   if(!LABS.length) return;
+  if(BATCH.running){ reopenBatch(); return; }   // don't reset a run in progress
   BATCH.pool=currentFilter();
   document.getElementById('batchAvail').textContent=BATCH.pool.length.toLocaleString();
   const n=document.getElementById('batchN');
@@ -1240,14 +1267,28 @@ function openBatch(){
   document.getElementById('batchProgress').hidden=true;
   document.getElementById('batchStartBtn').hidden=false; document.getElementById('batchStartBtn').disabled=!(c.endpoint&&c.model);
   document.getElementById('batchCloseBtn').hidden=false; document.getElementById('batchCloseBtn').textContent='Cancel';
-  document.getElementById('batchStopBtn').hidden=true; document.getElementById('batchWarn').hidden=true;
+  document.getElementById('batchStopBtn').hidden=true; document.getElementById('batchBgBtn').hidden=true; document.getElementById('batchWarn').hidden=true;
   document.getElementById('batchMsg').textContent=(c.endpoint&&c.model)?'':'Connect your local model first (AI settings).';
   document.getElementById('batchMsg').className='batch-msg'+((c.endpoint&&c.model)?'':' err');
   document.getElementById('batchTitle').textContent='Research & Prep';
   openModal('mBatch');
 }
-function closeBatch(){ if(BATCH.running) BATCH.stop=true; closeModal('mBatch'); }
+function closeBatch(){ if(BATCH.running){ minimizeBatch(); return; }   // running -> keep going in background
+  closeModal('mBatch'); hideDock(); }
+function minimizeBatch(){ closeModal('mBatch'); if(BATCH.running||BATCH.done){ showDock(); } }
+function reopenBatch(){ hideDock(); openModal('mBatch'); }
 function stopBatch(){ BATCH.stop=true; const m=document.getElementById('batchMsg'); m.className='batch-msg'; m.textContent='Stopping after the current company…'; }
+/* ---- floating progress dock ---- */
+const DOCK_C=100.5;
+function showDock(){ const d=document.getElementById('batchDock'); d.hidden=false; updateDock(); }
+function hideDock(){ document.getElementById('batchDock').hidden=true; }
+function updateDock(){
+  const total=(BATCH.pool2||[]).length, done=BATCH.done, pct=total?done/total:0, g=id=>document.getElementById(id);
+  g('dockRing').style.strokeDashoffset=(DOCK_C*(1-pct)).toFixed(1);
+  g('dockPct').textContent=Math.round(pct*100)+'%';
+  if(BATCH.running){ g('dockTitle').textContent='Researching…'; g('dockSub').textContent=done+' / '+total; }
+  else { g('dockTitle').textContent='Research done'; g('dockSub').textContent='view '+total+' results'; }
+}
 function feedRow(i,name){ return `<div class="feed-row queued" id="fr${i}"><span class="fd"></span><span class="fn">${esc(name)}</span><span class="fs" id="fs${i}">queued</span></div>`; }
 function setRow(i,state,label){ const r=document.getElementById('fr'+i); if(!r)return;
   r.className='feed-row '+state+((state==='searching'||state==='drafting')?' active':'');
@@ -1262,6 +1303,7 @@ function updRing(){
   document.getElementById('cSheets').textContent=BATCH.drafted;
   document.getElementById('cThin').textContent=BATCH.thin;
   document.getElementById('cFail').textContent=BATCH.failed;
+  if(!document.getElementById('batchDock').hidden) updateDock();
 }
 async function startBatch(){
   const c=getLLM();
@@ -1274,6 +1316,7 @@ async function startBatch(){
   document.getElementById('batchStartBtn').hidden=true;
   document.getElementById('batchCloseBtn').hidden=true;
   document.getElementById('batchStopBtn').hidden=false;
+  document.getElementById('batchBgBtn').hidden=false;
   document.getElementById('batchTitle').textContent='Researching '+pool.length+' companies';
   document.getElementById('batchFeed').innerHTML=pool.map((l,i)=>feedRow(i,l.name)).join('');
   updRing();
@@ -1300,7 +1343,9 @@ async function startBatch(){
   }
   clearInterval(timer); BATCH.running=false; render();
   document.getElementById('batchStopBtn').hidden=true;
+  document.getElementById('batchBgBtn').hidden=true;
   document.getElementById('batchCloseBtn').hidden=false; document.getElementById('batchCloseBtn').textContent='Done';
+  if(!document.getElementById('batchDock').hidden) updateDock();   // reflect done if minimized
   const m=document.getElementById('batchMsg');
   if(!m.textContent||m.className.indexOf('err')<0){ m.className='batch-msg ok';
     m.textContent=BATCH.done+' processed · '+BATCH.drafted+' web-grounded · '+BATCH.thin+' offline · '+BATCH.failed+' failed'; }

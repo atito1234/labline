@@ -174,6 +174,21 @@ python tools/ollama-search-proxy.py
 #    (use 127.0.0.1, not localhost), Search key = blank
 ```
 
+**So you don't retype it every time (Windows):** set the key once as a persistent user
+variable, then use the one-click launcher:
+
+```
+setx OLLAMA_API_KEY "your-key"        # once; then open a NEW window
+```
+
+Double-click **`start-labline.cmd`** (repo root) to start the web server and the proxy and
+open the app in one step. The proxy picks up the persisted key automatically — no retyping.
+Keep the two windows it opens running while you work; close them to stop.
+
+**Research runs in the background.** During "Research & Prep" you can click *Run in background*
+(or just close the panel) to keep using LabLine while it works; a floating progress dock stays
+in the corner and reopens the panel when clicked.
+
 "Research & Prep" then runs research over your currently-filtered leads in a capped batch,
 sequentially, with a live progress panel and a Stop button. Search queries reach Ollama's
 service through the proxy, so that part isn't fully offline; for a fully local alternative,
