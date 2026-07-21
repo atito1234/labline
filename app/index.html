@@ -327,6 +327,28 @@
   .dock-txt{display:flex;flex-direction:column;line-height:1.25;color:#eaf4f8}
   .dock-txt b{font-family:var(--fd);font-size:13px;font-weight:600}
   .dock-txt span{font-family:var(--fm);font-size:10.5px;color:#8aa6b8}
+
+  /* ---------- activity log ---------- */
+  .act-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .act-chip{flex:1;min-width:110px;background:var(--paper-2);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+  .act-chip b{font-family:var(--fd);font-size:22px;font-weight:600;display:block;color:var(--fam-deep)}
+  .act-chip span{font-family:var(--fm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .act-filter{display:flex;gap:16px;margin-bottom:14px;font-size:13px;color:var(--ink-2)}
+  .act-filter label{display:inline-flex;align-items:center;gap:7px;cursor:pointer}
+  .act-filter input{width:auto;accent-color:var(--fam)}
+  .act-timeline{display:flex;flex-direction:column}
+  .act-day{font-family:var(--fm);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);
+    margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+  .act-day:first-child{margin-top:0}
+  .act-row{display:flex;align-items:baseline;gap:11px;padding:7px 2px;font-size:14px}
+  .act-time{font-family:var(--fm);font-size:11.5px;color:var(--muted-2);flex:0 0 58px}
+  .act-dot{width:8px;height:8px;border-radius:50%;background:var(--muted-2);flex:0 0 auto;align-self:center}
+  .act-dot.dial{background:var(--fam)} .act-dot.interview{background:var(--cy5)}
+  .act-dot.followup{background:var(--rox)} .act-dot.no{background:#9aa8b2} .act-dot.note{background:var(--amber)}
+  .act-body{flex:1;min-width:0;color:var(--ink-2)}
+  .act-body b{color:var(--ink);font-weight:600}
+  .act-detail{color:var(--muted);font-style:italic}
+  .act-empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px}
 </style>
 </head>
 <body>
@@ -345,6 +367,7 @@
     <nav class="snav">
       <a class="home" href="../"><span class="ic">←</span> Back to home</a>
       <a class="active" href="#"><span class="ic">▤</span> Directory</a>
+      <a href="#" onclick="openActivity();return false"><span class="ic">◷</span> Activity log</a>
       <a href="../docs/DATA-SOURCES.md"><span class="ic">◫</span> Data sources</a>
     </nav>
 
@@ -391,6 +414,7 @@
         <div class="mcount" id="mcount">No organizations loaded</div>
       </div>
       <div class="hactions">
+        <button class="hbtn" onclick="openActivity()" id="btnActivity">◷ Activity</button>
         <button class="hbtn" onclick="clearData()" id="btnClear" disabled>Clear</button>
         <button class="hbtn" onclick="importPipeline()">Import</button>
         <button class="hbtn" onclick="exportPipeline()" id="btnExport" disabled>Export CSV</button>
@@ -561,6 +585,29 @@
       <span class="m-msg" id="prepMsg"></span>
       <button class="mbtn" onclick="savePrep()">Save</button>
       <button class="mbtn acc" id="prepGenBtn" onclick="generatePrep()">Generate call sheet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ACTIVITY LOG MODAL ============ -->
+<div class="modal-ov" id="mActivity">
+  <div class="modal wide">
+    <div class="m-head">
+      <div><h2>Activity log</h2><p>Every call and update, newest first — saved in this browser.</p></div>
+      <button class="m-x" onclick="closeModal('mActivity')">×</button>
+    </div>
+    <div class="m-body">
+      <div class="act-summary" id="actSummary"></div>
+      <div class="act-filter">
+        <label><input type="radio" name="actf" value="all" checked onchange="renderActivity()"> All actions</label>
+        <label><input type="radio" name="actf" value="dial" onchange="renderActivity()"> Calls only</label>
+      </div>
+      <div class="act-timeline" id="actTimeline"></div>
+    </div>
+    <div class="m-foot">
+      <span class="m-msg" id="actMsg"></span>
+      <button class="mbtn" onclick="clearActivity()">Clear log</button>
+      <button class="mbtn acc" onclick="downloadActivityLog()">Download log (CSV)</button>
     </div>
   </div>
 </div>
@@ -960,7 +1007,7 @@ function rowHTML(l,idx){
   if(l.sources.length>1) reasons.push('Multi-source');
   const tag=reasons.length?('✓ '+reasons.slice(0,2).join(' · ')):'Directory listing';
   const call=l.phone
-    ? `<a class="btn-call" href="tel:+1${l.phone}">☎ Call ${fmtPhone(l.phone)}</a>`
+    ? `<a class="btn-call" href="tel:+1${l.phone}" onclick="dialLog(${idx})">☎ Call ${fmtPhone(l.phone)}</a>`
     : `<a class="btn-look" href="https://www.google.com/search?q=${encodeURIComponent(l.name+' '+l.city+' '+l.state+' phone')}" target="_blank" rel="noopener">Find number ↗</a>`;
   const badges=l.sources.map(s=>`<span class="sbadge">${esc(s)}</span>`).join('');
   const on=SEL.has(l.id);
@@ -1001,9 +1048,9 @@ function refreshCounts(){
 }
 function setStat(i,v,el){ const l=SHOWN[i]; if(!l)return;
   PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].status=v;
-  el.className='status st-'+v; savePipe(); refreshCounts(); }
+  el.className='status st-'+v; savePipe(); refreshCounts(); logAct(l.id,l.name,'Status → '+(STATUS_LABELS[v]||v)); }
 function setNote(i,v){ const l=SHOWN[i]; if(!l)return;
-  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].note=v; savePipe(); }
+  PIPE[l.id]=PIPE[l.id]||{status:'new',note:''}; PIPE[l.id].note=v; savePipe(); logAct(l.id,l.name,'Note updated',(v||'').slice(0,60)); }
 
 /* ---------------- pipeline import / export ---------------- */
 function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
@@ -1390,6 +1437,56 @@ function updateSelBar(){
   bar.hidden=SEL.size===0; const n=document.getElementById('selN'); if(n) n.textContent=SEL.size;
 }
 
+/* ---- activity log: an automatic, timestamped record of every call & update ---- */
+function loadActivity(){ try{ return JSON.parse(localStorage.getItem('labline_activity'))||[]; }catch(e){ return []; } }
+function saveActivity(){ try{ localStorage.setItem('labline_activity',JSON.stringify(ACT)); }catch(e){} }
+let ACT=loadActivity();
+function logAct(id,name,action,detail){
+  ACT.push({t:new Date().toISOString(),id:id||'',name:name||'',action:action,detail:detail||''});
+  if(ACT.length>3000) ACT=ACT.slice(-3000);
+  saveActivity(); updateActBadge();
+  if(document.getElementById('mActivity').classList.contains('open')) renderActivity();
+}
+function dialLog(idx){ const l=SHOWN[idx]; if(l) logAct(l.id,l.name,'Dialed',l.phone?fmtPhone(l.phone):''); }
+function actClass(a){ if(a==='Dialed')return 'dial'; if(a==='Note updated')return 'note';
+  if(/Interview/.test(a))return 'interview'; if(/Follow up/.test(a))return 'followup'; if(/Not a fit/.test(a))return 'no'; return ''; }
+function updateActBadge(){ const b=document.getElementById('btnActivity'); if(!b)return;
+  const today=new Date().toDateString(), n=ACT.filter(a=>new Date(a.t).toDateString()===today).length;
+  b.textContent='◷ Activity'+(n?' ('+n+')':''); }
+function dayLabel(d){ const t=new Date(), y=new Date(); y.setDate(t.getDate()-1);
+  if(d.toDateString()===t.toDateString())return 'Today'; if(d.toDateString()===y.toDateString())return 'Yesterday';
+  return d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'}); }
+function openActivity(){ renderActivity(); openModal('mActivity'); }
+function renderActivity(){
+  const tl=document.getElementById('actTimeline');
+  const f=(document.querySelector('input[name=actf]:checked')||{}).value||'all';
+  const today=new Date().toDateString();
+  const todays=ACT.filter(a=>new Date(a.t).toDateString()===today);
+  const dialToday=todays.filter(a=>a.action==='Dialed').length;
+  const chip=(n,l)=>`<div class="act-chip"><b>${n}</b><span>${l}</span></div>`;
+  document.getElementById('actSummary').innerHTML=chip(todays.length,'actions today')+chip(dialToday,'calls today')+chip(ACT.length,'total logged');
+  let list=ACT.slice().reverse();
+  if(f==='dial') list=list.filter(a=>a.action==='Dialed');
+  if(!list.length){ tl.innerHTML='<div class="act-empty">No activity yet. As you click Call, set a status, or add a note, it shows up here automatically.</div>'; return; }
+  let html='',lastDay='';
+  for(const a of list){
+    const d=new Date(a.t), day=d.toDateString();
+    if(day!==lastDay){ html+='<div class="act-day">'+esc(dayLabel(d))+'</div>'; lastDay=day; }
+    html+='<div class="act-row"><span class="act-time">'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</span>'
+      +'<span class="act-dot '+actClass(a.action)+'"></span>'
+      +'<span class="act-body"><b>'+esc(a.name||'—')+'</b> — '+esc(a.action)+(a.detail?' <span class="act-detail">“'+esc(a.detail)+'”</span>':'')+'</span></div>';
+  }
+  tl.innerHTML=html;
+}
+function downloadActivityLog(){
+  if(!ACT.length){ const m=document.getElementById('actMsg'); m.className='m-msg err'; m.textContent='Nothing logged yet.'; return; }
+  const lines=[['timestamp','organisation','action','detail'].join(',')];
+  ACT.forEach(a=>lines.push([a.t,a.name,a.action,a.detail].map(csvCell).join(',')));
+  download('labline-activity-'+new Date().toISOString().slice(0,10)+'.csv',lines.join('\n'),'text/csv;charset=utf-8');
+}
+function clearActivity(){ ACT=[]; saveActivity(); renderActivity(); updateActBadge();
+  const m=document.getElementById('actMsg'); m.className='m-msg ok'; m.textContent='Log cleared.'; }
+
 /* ---- batch research & prep ---- */
 const RING_C=326.7;
 let BATCH={running:false,stop:false,pool:[],pool2:[],done:0,drafted:0,thin:0,failed:0,t0:0};
@@ -1511,7 +1608,7 @@ async function startBatch(){
 /* ---------------- init ---------------- */
 (function(){
   document.getElementById('gState').innerHTML=STATES.map(s=>`<option${s==='TX'?' selected':''}>${s}</option>`).join('');
-  updateLLMStatus(); updateResumeState(); updateDownloadState(); updateSelBar();
+  updateLLMStatus(); updateResumeState(); updateDownloadState(); updateSelBar(); updateActBadge();
   render();
 })();
 </script>
