@@ -175,6 +175,62 @@
     .jscore::after{display:none}
     .score-tag{margin-top:0}
   }
+
+  /* ---------- call prep: sidebar status ---------- */
+  .llm-status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:10px}
+  .llm-status .d{width:8px;height:8px;border-radius:50%;background:var(--muted-2);flex:0 0 auto}
+  .llm-status.ok .d{background:var(--fam)} .llm-status.off .d{background:var(--rox)}
+  .prepbtn{width:100%;text-align:left;padding:10px 13px;margin-top:8px;border:1px solid var(--line-2);border-radius:11px;background:#fff;cursor:pointer;transition:.15s;font-size:13px;display:flex;align-items:center;gap:9px}
+  .prepbtn:hover{border-color:var(--fam);background:var(--paper-2)}
+  .prepbtn .ic{opacity:.8}
+  .prepbtn .rz{margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--muted-2)}
+
+  /* downloads block in right rail */
+  .dlrow{display:flex;flex-direction:column;gap:8px}
+  .dlbtn{text-align:left;padding:10px 13px;border:1px solid var(--line-2);border-radius:10px;background:#fff;cursor:pointer;font-size:13px;transition:.15s;display:flex;align-items:center;gap:9px}
+  .dlbtn:hover{border-color:var(--ink);background:var(--paper-2)}
+  .dlbtn:disabled{opacity:.5;cursor:not-allowed}
+  .dlbtn small{display:block;color:var(--muted-2);font-size:11px}
+
+  /* readiness pill on cards */
+  .ready-pill{font-family:var(--fm);font-size:9.5px;letter-spacing:.05em;padding:3px 9px;border-radius:20px;margin-top:6px;display:inline-block}
+  .r-ready{background:rgba(255,255,255,.16);color:#eafffb}
+  .r-need{background:rgba(255,255,255,.10);color:rgba(255,255,255,.7)}
+  .btn-prep{font-size:13px;padding:8px 14px;border-radius:20px;border:1px solid var(--cy5);background:#fff;color:var(--cy5);cursor:pointer;white-space:nowrap;font-weight:500}
+  .btn-prep:hover{background:#eef3fb}
+  .btn-prep.has{background:var(--cy5);color:#fff}
+
+  /* ---------- modal ---------- */
+  .modal-ov{position:fixed;inset:0;background:rgba(10,24,38,.55);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 18px;overflow:auto}
+  .modal-ov.open{display:flex}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:16px;width:100%;max-width:640px;box-shadow:0 40px 80px -30px rgba(0,0,0,.5);overflow:hidden}
+  .modal.wide{max-width:760px}
+  .m-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+  .m-head h2{font-size:18px}
+  .m-head p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+  .m-x{background:none;border:0;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:8px}
+  .m-x:hover{background:var(--paper-2);color:var(--ink)}
+  .m-body{padding:20px 22px;max-height:70vh;overflow:auto}
+  .m-foot{display:flex;gap:10px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .fld{margin-bottom:16px}
+  .fld label{display:block;font-family:var(--fm);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .fld input,.fld select,.fld textarea{width:100%;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;font-size:14px;background:#fff}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--fam);box-shadow:0 0 0 3px var(--fam-glow)}
+  .fld textarea{min-height:130px;resize:vertical;line-height:1.5}
+  .fld .hint{font-size:12px;color:var(--muted-2);margin-top:6px;line-height:1.5}
+  .fld .hint code{font-family:var(--fm);background:var(--paper-2);padding:1px 5px;border-radius:5px;font-size:11.5px}
+  .mbtn{font-size:14px;font-weight:500;padding:10px 18px;border-radius:22px;border:1px solid var(--line-2);background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
+  .mbtn:hover{border-color:var(--ink);background:var(--paper-2)}
+  .mbtn.acc{background:var(--fam);border-color:var(--fam);color:#04211f;font-weight:600}
+  .mbtn.acc:hover{background:var(--fam-deep);border-color:var(--fam-deep);color:#fff}
+  .mbtn:disabled{opacity:.5;cursor:not-allowed}
+  .m-msg{font-size:13px;margin-right:auto;align-self:center}
+  .m-msg.ok{color:var(--fam-deep)} .m-msg.err{color:var(--rox)}
+  .prep-out{white-space:pre-wrap;font-size:13.5px;line-height:1.6;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-height:120px;color:var(--ink-2)}
+  .prep-lead{font-size:13px;color:var(--muted);margin-bottom:14px;padding:11px 14px;background:var(--paper-2);border-radius:10px}
+  .prep-lead b{color:var(--ink)}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line-2);border-top-color:var(--fam);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+  @keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -222,6 +278,13 @@
 
       <div class="log" id="log"></div>
     </div>
+
+    <div class="sect">
+      <div class="st">2 · Call prep (local AI)</div>
+      <div class="llm-status off" id="llmStatus"><span class="d"></span> <span id="llmStatusText">AI not connected</span></div>
+      <button class="prepbtn" onclick="openSettings()"><span class="ic">⚙</span> AI settings</button>
+      <button class="prepbtn" onclick="openResume()"><span class="ic">▤</span> My resume <span class="rz" id="resumeState">none</span></button>
+    </div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -235,7 +298,7 @@
         <button class="hbtn" onclick="clearData()" id="btnClear" disabled>Clear</button>
         <button class="hbtn" onclick="importPipeline()">Import pipeline</button>
         <button class="hbtn acc" onclick="exportPipeline()" id="btnExport" disabled>Export pipeline (CSV)</button>
-        <input type="file" id="pipeFile" accept=".csv" hidden onchange="handlePipeImport(event)" />
+        <input type="file" id="pipeFile" accept=".csv,.json,application/json" hidden onchange="handlePipeImport(event)" />
       </div>
     </div>
 
@@ -268,6 +331,14 @@
       <div class="stat s-rox"><div class="lab">Contacted</div><div class="val" id="sContacted">0</div></div>
       <div class="stat s-cy5"><div class="lab">Interviews</div><div class="val" id="sInterview">0</div></div>
     </div>
+
+    <p class="rb-title" style="margin-top:22px">Download your work</p>
+    <div class="dlrow">
+      <button class="dlbtn" id="dlCsv" onclick="exportPipeline()" disabled>Pipeline (CSV)<small>Status, contact &amp; notes per lead</small></button>
+      <button class="dlbtn" id="dlMd" onclick="downloadCallSheets()" disabled>Call sheets (Markdown)<small>Company info, contacts &amp; AI scripts</small></button>
+      <button class="dlbtn" id="dlJson" onclick="downloadBackup()" disabled>Full backup (JSON)<small>Everything, re-importable</small></button>
+    </div>
+
     <div class="rb-note">
       <b>Call Priority is a guide, not a rating.</b>
       A rough heuristic from reachability (has a phone), test complexity (high-complexity / accredited labs are the director-track ones), and cross-source confirmation. Always verify before you dial — federal files are quarterly snapshots.
@@ -278,6 +349,96 @@
     </div>
   </aside>
 
+</div>
+
+<!-- ============ AI SETTINGS MODAL ============ -->
+<div class="modal-ov" id="mSettings">
+  <div class="modal">
+    <div class="m-head">
+      <div><h2>AI settings</h2><p>Connect your own local model. Nothing leaves your machine.</p></div>
+      <button class="m-x" onclick="closeModal('mSettings')">×</button>
+    </div>
+    <div class="m-body">
+      <div class="fld">
+        <label>Runtime</label>
+        <select id="llmFormat">
+          <option value="ollama">Ollama</option>
+          <option value="openai">LM Studio / OpenAI-compatible</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Endpoint</label>
+        <input id="llmEndpoint" placeholder="http://localhost:11434" />
+        <div class="hint">Ollama default is <code>http://localhost:11434</code>. LM Studio is <code>http://localhost:1234/v1</code>.</div>
+      </div>
+      <div class="fld">
+        <label>Model</label>
+        <input id="llmModel" placeholder="llama3.1  ·  qwen2.5  ·  mistral …" />
+        <div class="hint">The name as your runtime lists it (e.g. <code>ollama list</code>).</div>
+      </div>
+      <div class="fld">
+        <div class="hint"><b>One-time setup:</b> so the browser may talk to Ollama, start it allowing this origin — e.g. set <code>OLLAMA_ORIGINS=*</code> (or your LabLine URL) before launching <code>ollama serve</code>. This works when you run LabLine locally; the public site can't reach a local model.</div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <span class="m-msg" id="settingsMsg"></span>
+      <button class="mbtn" onclick="testLLM()">Test connection</button>
+      <button class="mbtn acc" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RESUME MODAL ============ -->
+<div class="modal-ov" id="mResume">
+  <div class="modal">
+    <div class="m-head">
+      <div><h2>My resume</h2><p>Used to tailor every call script. Stored only in this browser.</p></div>
+      <button class="m-x" onclick="closeModal('mResume')">×</button>
+    </div>
+    <div class="m-body">
+      <div class="fld">
+        <label>Paste resume text, or upload a .txt file</label>
+        <input type="file" id="resumeFile" accept=".txt,text/plain" onchange="handleResumeFile(event)" style="margin-bottom:10px" />
+        <textarea id="resumeText" placeholder="Paste your resume here — experience, skills, certifications, the roles you're targeting…"></textarea>
+        <div class="hint">PDF/Word aren't parsed yet — copy the text out and paste it. The more specific, the better your scripts.</div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <span class="m-msg" id="resumeMsg"></span>
+      <button class="mbtn" onclick="clearResume()">Clear</button>
+      <button class="mbtn acc" onclick="saveResume()">Save resume</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CALL PREP MODAL ============ -->
+<div class="modal-ov" id="mPrep">
+  <div class="modal wide">
+    <div class="m-head">
+      <div><h2>Call prep</h2><p id="prepSub">AI-drafted talking points for this lab</p></div>
+      <button class="m-x" onclick="closeModal('mPrep')">×</button>
+    </div>
+    <div class="m-body">
+      <div class="prep-lead" id="prepLead"></div>
+      <div class="fld">
+        <label>Who you're trying to reach (optional)</label>
+        <input id="prepContact" placeholder="e.g. Laboratory Director, or a name once you know it" />
+      </div>
+      <div class="fld">
+        <label>Company info to analyze (optional — paste their About / Careers / job text)</label>
+        <textarea id="prepCompany" placeholder="Open the company's website and paste anything useful here — what they do, recent news, the role. Browsers can't fetch other sites for you, so paste is how the AI 'reads' them."></textarea>
+      </div>
+      <div class="fld">
+        <label>AI call sheet</label>
+        <div class="prep-out" id="prepOut">Fill in what you have, then Generate. Needs your local AI connected (AI settings).</div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <span class="m-msg" id="prepMsg"></span>
+      <button class="mbtn" onclick="savePrep()">Save</button>
+      <button class="mbtn acc" id="prepGenBtn" onclick="generatePrep()">Generate call sheet</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -298,7 +459,7 @@ let PIPE=loadPipe();
 /* ---------------- storage ---------------- */
 function loadPipe(){ try{const r=localStorage.getItem('labline_pipe');return r?JSON.parse(r):{};}catch(e){return {};} }
 function savePipe(){ try{localStorage.setItem('labline_pipe',JSON.stringify(PIPE));}catch(e){}
-  document.getElementById('btnExport').disabled=Object.keys(PIPE).length===0; }
+  updateDownloadState(); }
 
 /* ---------------- logging ---------------- */
 function log(msg,kind){
@@ -599,7 +760,7 @@ function render(){
 }
 function rowHTML(l,idx){
   const p=PIPE[l.id]||{status:'new',note:''};
-  const score=leadScore(l), tier=leadTier(score);
+  const score=leadScore(l), tier=leadTier(score), rdy=readiness(l);
   const reasons=[]; const cl=(l.cert||'').toLowerCase();
   if(l.phone) reasons.push('Has phone');
   if(cl.includes('compliance')||cl.includes('accredit')) reasons.push('High-complexity');
@@ -623,6 +784,7 @@ function rowHTML(l,idx){
           ${Object.entries(STATUS_LABELS).map(([v,t])=>`<option value="${v}"${p.status===v?' selected':''}>${t}</option>`).join('')}
         </select>
         ${call}
+        <button class="btn-prep${p.prep?' has':''}" type="button" onclick="openPrep(${idx})">⚡ ${p.prep?'Call sheet':'Prep'}</button>
         <button class="btn-note" type="button" onclick="toggleNote(this)">✎ Note</button>
       </div>
       <div class="jnote"${p.note?'':' hidden'}><textarea class="note" placeholder="Who you spoke to, next step…" onchange="setNote(${idx},this.value)">${esc(p.note)}</textarea></div>
@@ -631,6 +793,7 @@ function rowHTML(l,idx){
       <div class="score-pct">${score}<small>%</small></div>
       <div class="score-label">${leadLabel(score)}</div>
       <div class="score-tag">${esc(tag)}</div>
+      <div class="ready-pill ${rdy>=70?'r-ready':'r-need'}">${rdy>=70?'✓ Ready to call':'Prep needed'}</div>
     </aside>
   </article>`;
 }
@@ -651,13 +814,13 @@ function setNote(i,v){ const l=SHOWN[i]; if(!l)return;
 function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function exportPipeline(){
   const byId=Object.fromEntries(LABS.map(l=>[l.id,l]));
-  const lines=[['record_id','organisation','external_id','address','city','state','zip','phone','category','sources','status','notes'].join(',')];
+  const lines=[['record_id','organisation','external_id','address','city','state','zip','phone','category','sources','status','contact','has_call_sheet','notes'].join(',')];
   for(const [id,p] of Object.entries(PIPE)){
-    if(p.status==='new'&&!p.note) continue;
+    if(p.status==='new'&&!p.note&&!p.contact&&!p.prep) continue;
     const l=byId[id]||{};
     lines.push([id,l.name||'',l.extId||'',l.addr||'',l.city||'',l.state||'',l.zip||'',
       l.phone?fmtPhone(l.phone):'',l.cert||'',(l.sources||[]).join(' / '),
-      STATUS_LABELS[p.status]||p.status,p.note||''].map(csvCell).join(','));
+      STATUS_LABELS[p.status]||p.status,p.contact||'',p.prep?'yes':'',p.note||''].map(csvCell).join(','));
   }
   const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');
@@ -670,22 +833,232 @@ function handlePipeImport(e){
   const f=e.target.files[0]; if(!f)return;
   const rd=new FileReader();
   rd.onload=()=>{ try{
-      const rows=parseCSV(rd.result), h=rows[0].map(x=>x.toLowerCase());
-      const iI=h.indexOf('record_id'), iS=h.indexOf('status'), iN=h.indexOf('notes');
+      const raw=rd.result.replace(/^﻿/,'').trim();
+      if(raw[0]==='{'){                                   // full JSON backup
+        const data=JSON.parse(raw);
+        if(data.pipeline){ PIPE=data.pipeline; savePipe(); }
+        if(data.resume){ setResume(data.resume); updateResumeState(); }
+        render(); log(`Restored backup: ${Object.keys(PIPE).length} pipeline entries${data.resume?' + resume':''}.`,'ok');
+        return;
+      }
+      const rows=parseCSV(raw), h=rows[0].map(x=>x.toLowerCase());
+      const iI=h.indexOf('record_id'), iS=h.indexOf('status'), iN=h.indexOf('notes'), iC=h.indexOf('contact');
       if(iI<0){ log('No record_id column — is this a LabLine pipeline export?','err'); return; }
       const rev=Object.fromEntries(Object.entries(STATUS_LABELS).map(([k,v])=>[v.toLowerCase(),k]));
       let n=0;
       for(let i=1;i<rows.length;i++){ const id=rows[i][iI]; if(!id)continue;
-        PIPE[id]={status:rev[String(rows[i][iS]||'').toLowerCase()]||'new',note:rows[i][iN]||''}; n++; }
+        const ex=PIPE[id]||{};
+        PIPE[id]={...ex,status:rev[String(rows[i][iS]||'').toLowerCase()]||'new',note:rows[i][iN]||'',
+          contact:(iC>=0?rows[i][iC]:'')||ex.contact||''}; n++; }
       savePipe(); render(); log(`Restored ${n} pipeline entries.`,'ok');
     }catch(err){ log('Could not read that pipeline file.','err'); } };
   rd.readAsText(f);
 }
 
+/* ================= CALL PREP: local AI, resume, prep, downloads ================= */
+
+/* ---- stores ---- */
+function getLLM(){ try{return JSON.parse(localStorage.getItem('labline_llm'))||{};}catch(e){return {};} }
+function setLLM(c){ try{localStorage.setItem('labline_llm',JSON.stringify(c));}catch(e){} }
+function getResume(){ try{return localStorage.getItem('labline_resume')||'';}catch(e){return '';} }
+function setResume(t){ try{ if(t) localStorage.setItem('labline_resume',t); else localStorage.removeItem('labline_resume'); }catch(e){} }
+
+/* ---- readiness: how prepared YOU are for this call (distinct from lead quality) ---- */
+function readiness(l){
+  const p=PIPE[l.id]||{}; let r=0;
+  if(getResume()) r+=25;                                   // resume on file (tailors every script)
+  if(p.prep) r+=45;                                        // AI call sheet generated
+  if(p.contact) r+=20;                                     // decision-maker identified
+  if(p.status&&p.status!=='new') r+=10;                    // already engaged
+  return Math.min(100,r);
+}
+
+/* ---- modal helpers ---- */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click',e=>{ if(e.target.classList&&e.target.classList.contains('modal-ov')) e.target.classList.remove('open'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-ov.open').forEach(m=>m.classList.remove('open')); });
+
+/* ---- AI settings ---- */
+function updateLLMStatus(){
+  const c=getLLM(); const el=document.getElementById('llmStatus'), tx=document.getElementById('llmStatusText');
+  if(c.endpoint&&c.model){ el.className='llm-status ok'; tx.textContent=c.model+' · connected'; }
+  else { el.className='llm-status off'; tx.textContent='AI not connected'; }
+}
+function openSettings(){
+  const c=getLLM();
+  document.getElementById('llmFormat').value=c.format||'ollama';
+  document.getElementById('llmEndpoint').value=c.endpoint||'http://localhost:11434';
+  document.getElementById('llmModel').value=c.model||'';
+  document.getElementById('settingsMsg').textContent='';
+  openModal('mSettings');
+}
+function readSettingsForm(){
+  return { format:document.getElementById('llmFormat').value,
+    endpoint:document.getElementById('llmEndpoint').value.trim().replace(/\/$/,''),
+    model:document.getElementById('llmModel').value.trim() };
+}
+function saveSettings(){
+  const c=readSettingsForm();
+  if(!c.endpoint||!c.model){ msg('settingsMsg','Enter both an endpoint and a model.','err'); return; }
+  setLLM(c); updateLLMStatus(); msg('settingsMsg','Saved.','ok'); setTimeout(()=>closeModal('mSettings'),500);
+}
+async function testLLM(){
+  const c=readSettingsForm();
+  if(!c.endpoint){ msg('settingsMsg','Enter an endpoint first.','err'); return; }
+  msg('settingsMsg','Testing…','');
+  try{
+    const url=c.format==='ollama'?c.endpoint+'/api/tags':c.endpoint+'/models';
+    const res=await fetchT(url,{},10000);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j=await res.json();
+    const models=c.format==='ollama'?(j.models||[]).map(m=>m.name):(j.data||[]).map(m=>m.id);
+    msg('settingsMsg','Connected — '+(models.length?models.slice(0,3).join(', ')+(models.length>3?'…':''):'no models listed'),'ok');
+  }catch(err){
+    msg('settingsMsg','Could not reach it: '+err.message+' — this works when LabLine runs locally with your model allowing this origin (see setup).','err');
+  }
+}
+
+/* ---- resume ---- */
+function updateResumeState(){ document.getElementById('resumeState').textContent=getResume()?'on file':'none'; }
+function openResume(){ document.getElementById('resumeText').value=getResume(); document.getElementById('resumeMsg').textContent=''; openModal('mResume'); }
+function handleResumeFile(e){ const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{ document.getElementById('resumeText').value=rd.result; }; rd.readAsText(f); }
+function saveResume(){ setResume(document.getElementById('resumeText').value.trim()); updateResumeState(); updateDownloadState(); render();
+  msg('resumeMsg','Saved.','ok'); setTimeout(()=>closeModal('mResume'),500); }
+function clearResume(){ document.getElementById('resumeText').value=''; setResume(''); updateResumeState(); updateDownloadState(); render(); msg('resumeMsg','Cleared.','ok'); }
+
+/* ---- fetch with an abort timeout so an unreachable/hung model never spins forever ---- */
+async function fetchT(url,opts,ms){
+  const ac=new AbortController(); const t=setTimeout(()=>ac.abort(),ms||120000);
+  try{ return await fetch(url,{...(opts||{}),signal:ac.signal}); }
+  catch(e){ if(e.name==='AbortError') throw new Error('timed out — is your local model running and reachable?'); throw e; }
+  finally{ clearTimeout(t); }
+}
+/* ---- LLM chat ---- */
+async function llmChat(messages){
+  const c=getLLM();
+  if(!c.endpoint||!c.model) throw new Error('No local model set — open AI settings.');
+  if(c.format==='ollama'){
+    const res=await fetchT(c.endpoint+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:c.model,messages,stream:false})},180000);
+    if(!res.ok) throw new Error('model HTTP '+res.status);
+    const j=await res.json(); return (j.message&&j.message.content)||'';
+  } else {
+    const res=await fetchT(c.endpoint+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:c.model,messages,stream:false})},180000);
+    if(!res.ok) throw new Error('model HTTP '+res.status);
+    const j=await res.json(); return (j.choices&&j.choices[0]&&j.choices[0].message.content)||'';
+  }
+}
+
+/* ---- per-lead call prep ---- */
+let PREP_ID=null;
+function openPrep(idx){
+  const l=SHOWN[idx]; if(!l) return;
+  PREP_ID=l.id; const p=PIPE[l.id]||{};
+  document.getElementById('prepSub').textContent='AI-drafted talking points for '+l.name;
+  document.getElementById('prepLead').innerHTML=`<b>${esc(l.name)}</b> · ${esc(l.city)}${l.city&&l.state?', ':''}${esc(l.state)}`
+    +` · ${esc(l.cert||'—')} · ${l.phone?fmtPhone(l.phone):'no phone on file'} · via ${esc((l.sources||[]).join(' / '))}`;
+  document.getElementById('prepContact').value=p.contact||'';
+  document.getElementById('prepCompany').value=p.company||'';
+  document.getElementById('prepOut').textContent=p.prep||'Fill in what you have, then Generate. Needs your local AI connected (AI settings).';
+  document.getElementById('prepMsg').textContent='';
+  openModal('mPrep');
+}
+function buildPrepMessages(l){
+  const resume=getResume();
+  const company=document.getElementById('prepCompany').value.trim();
+  const contact=document.getElementById('prepContact').value.trim();
+  const sys="You are an expert cold-calling and career coach helping a scientist land a role at a clinical laboratory, "
+    +"diagnostics, or biotech company. Apply proven cold-calling structure and be concrete, concise, and practical. "
+    +"Return a ready-to-use call sheet in markdown with exactly these sections:\n"
+    +"1. Who to ask for — the right decision-maker to reach (and how to get past the front desk)\n"
+    +"2. Goal of the call — one concrete objective\n"
+    +"3. Opening line — a 1-2 sentence intro said in one breath (who you are + why you're calling)\n"
+    +"4. Talking points — 3 to 5 bullets tying THIS candidate's background to THIS organization\n"
+    +"5. Likely objections & responses — 2 to 3\n"
+    +"6. The ask — the specific next step to request (informational meeting, send CV, follow-up)\n"
+    +"Keep the whole call under 60 seconds of talking. Never invent facts about the candidate or company.";
+  const usr="TARGET ORGANIZATION (from a federal directory):\n"
+    +`- Name: ${l.name}\n- Location: ${l.city}, ${l.state} ${l.zip}\n- Category/certificate: ${l.cert||'unknown'}\n`
+    +`- Listed in: ${(l.sources||[]).join(', ')}\n- Phone on file: ${l.phone?fmtPhone(l.phone):'none'}\n\n`
+    +`WHO I'M TRYING TO REACH: ${contact||'(not specified — suggest the most likely decision-maker)'}\n\n`
+    +`COMPANY INFO I PASTED (may be empty):\n${company||'(none provided)'}\n\n`
+    +`MY RESUME:\n${resume||'(no resume on file — keep talking points generic but still tailored to this kind of lab)'}\n\n`
+    +"Write the call sheet.";
+  return [{role:'system',content:sys},{role:'user',content:usr}];
+}
+async function generatePrep(){
+  const l=SHOWN.find(x=>x.id===PREP_ID)||LABS.find(x=>x.id===PREP_ID); if(!l) return;
+  const btn=document.getElementById('prepGenBtn'), out=document.getElementById('prepOut');
+  btn.disabled=true; out.innerHTML='<span class="spin"></span>Drafting your call sheet…';
+  document.getElementById('prepMsg').textContent='';
+  try{
+    const text=await llmChat(buildPrepMessages(l));
+    out.textContent=text||'(the model returned nothing — try a different model)';
+  }catch(err){
+    out.textContent='Fill in what you have, then Generate.';
+    msg('prepMsg','Couldn’t generate: '+err.message,'err');
+  }finally{ btn.disabled=false; }
+}
+function savePrep(){
+  const l=SHOWN.find(x=>x.id===PREP_ID)||LABS.find(x=>x.id===PREP_ID); if(!l) return;
+  const out=document.getElementById('prepOut').textContent.trim();
+  const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''};
+  p.contact=document.getElementById('prepContact').value.trim();
+  p.company=document.getElementById('prepCompany').value.trim();
+  if(out && !out.startsWith('Fill in what you have')){ p.prep=out; p.prepAt=new Date().toISOString().slice(0,10); }
+  savePipe(); render(); closeModal('mPrep');
+}
+function msg(id,text,kind){ const el=document.getElementById(id); el.textContent=text; el.className='m-msg'+(kind?' '+kind:''); }
+
+/* ---- downloads ---- */
+function hasPipeContent(){ return Object.values(PIPE).some(p=>p&&((p.status&&p.status!=='new')||p.note||p.prep||p.contact)); }
+function updateDownloadState(){
+  const anyPipe=hasPipeContent(), g=id=>document.getElementById(id);
+  ['dlCsv','dlMd','btnExport'].forEach(i=>{ if(g(i)) g(i).disabled=!anyPipe; });
+  if(g('dlJson')) g('dlJson').disabled=!(anyPipe||getResume()||LABS.length);
+}
+function download(name,text,type){
+  const blob=new Blob([text],{type:type||'text/plain;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+function downloadCallSheets(){
+  const byId=Object.fromEntries(LABS.map(l=>[l.id,l]));
+  const stamp=new Date().toISOString().slice(0,10);
+  let md='# LabLine call sheets — '+stamp+'\n\n';
+  let n=0;
+  for(const [id,p] of Object.entries(PIPE)){
+    if(!((p.status&&p.status!=='new')||p.note||p.prep||p.contact)) continue;
+    const l=byId[id]||{}; n++;
+    md+='---\n\n## '+(l.name||id)+'\n\n';
+    md+='- **Location:** '+[l.addr,l.city,l.state,l.zip].filter(Boolean).join(', ')+'\n';
+    md+='- **Category:** '+(l.cert||'—')+'\n';
+    md+='- **Phone:** '+(l.phone?fmtPhone(l.phone):'—')+'\n';
+    md+='- **Listed in:** '+((l.sources||[]).join(' / ')||'—')+'\n';
+    md+='- **Status:** '+(STATUS_LABELS[p.status]||p.status||'—')+'\n';
+    if(p.contact) md+='- **Spoke with / target:** '+p.contact+'\n';
+    md+='\n';
+    if(p.note) md+='**Notes:** '+p.note+'\n\n';
+    if(p.prep) md+='### AI call sheet'+(p.prepAt?' ('+p.prepAt+')':'')+'\n\n'+p.prep+'\n\n';
+  }
+  if(!n){ log('Nothing to export yet — set a status, add a contact, or generate a call sheet.','err'); return; }
+  download('labline-call-sheets-'+stamp+'.md',md,'text/markdown;charset=utf-8');
+}
+function downloadBackup(){
+  const referenced=new Set(Object.keys(PIPE));
+  const byId=Object.fromEntries(LABS.map(l=>[l.id,l]));
+  const leads=[...referenced].map(id=>byId[id]).filter(Boolean);
+  const data={ app:'LabLine', kind:'backup', version:1, exported:new Date().toISOString().slice(0,10),
+    resume:getResume(), pipeline:PIPE, leads };
+  download('labline-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(data,null,2),'application/json');
+}
+
 /* ---------------- init ---------------- */
 (function(){
   document.getElementById('gState').innerHTML=STATES.map(s=>`<option${s==='TX'?' selected':''}>${s}</option>`).join('');
-  document.getElementById('btnExport').disabled=Object.keys(PIPE).length===0;
+  updateLLMStatus(); updateResumeState(); updateDownloadState();
   render();
 })();
 </script>

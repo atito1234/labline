@@ -140,6 +140,35 @@ their number.
 
 ---
 
+## Call Prep — optional local AI
+
+LabLine's directory needs no AI. The optional **Call Prep** layer connects to a language
+model **you** run on your own machine (Ollama or LM Studio) to draft tailored cold-call
+scripts from your resume plus company info you paste. Nothing is sent to any third party —
+resume, company notes, and generated scripts stay in your browser and talk only to your
+local model.
+
+**It runs locally, not on the hosted site.** Browsers block a public `https://` page from
+reaching a local model (mixed-content / private-network rules), so Call Prep works when you
+launch LabLine on your own computer (`python -m http.server` then open the local URL). The
+public github.io site remains the free directory.
+
+**One-time setup (Ollama):** start Ollama allowing the LabLine origin, e.g.
+`OLLAMA_ORIGINS=* ollama serve`, then in LabLine → **AI settings** set the endpoint
+(`http://localhost:11434`) and a model name (`ollama list`). LM Studio: enable its local
+server, use `http://localhost:1234/v1`.
+
+**Company websites are not auto-fetched.** Browsers can't read arbitrary third-party sites
+(CORS), so you paste the relevant text (About / Careers / job post) and the local model works
+from that. Server-side fetching would need a backend and is deliberately out of scope here.
+
+**Two scores, kept separate.** *Call Priority* rates how good a target a lab is (reachability,
+test complexity, cross-source confirmation). *Call Readiness* rates how prepared you are
+(resume on file, call sheet generated, decision-maker identified, already engaged). Both are
+heuristics to help you prioritize — not official ratings.
+
+---
+
 ## Handling contact data responsibly
 
 - Facility main lines only. LabLine never surfaces, stores, or exports the laboratory
