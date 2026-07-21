@@ -97,7 +97,7 @@
   .cards{display:flex;flex-direction:column;gap:12px}
   .jcard{display:flex;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:.15s}
   .jcard:hover{border-color:var(--line-2);box-shadow:0 6px 20px -12px rgba(10,24,38,.28)}
-  .jmain{flex:1;min-width:0;padding:16px 18px}
+  .jmain{flex:1;min-width:0;padding:16px 18px 16px 48px;position:relative}
   .jbadges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
   .sbadge{font-family:var(--fm);font-size:10px;padding:2px 8px;border-radius:20px;background:#e9f7f5;color:#0a5f58;border:1px solid #bfe6e1}
   .certpill{font-family:var(--fm);font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid}
@@ -199,6 +199,33 @@
   .btn-prep{font-size:13px;padding:8px 14px;border-radius:20px;border:1px solid var(--cy5);background:#fff;color:var(--cy5);cursor:pointer;white-space:nowrap;font-weight:500}
   .btn-prep:hover{background:#eef3fb}
   .btn-prep.has{background:var(--cy5);color:#fff}
+
+  /* card selection */
+  .jcard{cursor:pointer}
+  .jcard.sel{border-color:var(--fam);box-shadow:0 0 0 2px var(--fam-glow)}
+  .card-sel{position:absolute;left:15px;top:16px;width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);
+    background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;line-height:1;padding:0;transition:.12s}
+  .card-sel:hover{border-color:var(--fam);transform:scale(1.12)}
+  .card-sel.on{background:var(--fam);border-color:var(--fam)}
+  .jcard.sel .jscore::after{background:var(--fam);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+
+  /* selection bar */
+  .selbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-6px 0 16px;padding:11px 16px;
+    background:linear-gradient(90deg,var(--fam-glow),transparent);border:1px solid var(--fam);border-radius:30px;animation:selin .2s ease}
+  @keyframes selin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  .selcount{font-size:14px;color:var(--fam-deep)} .selcount b{font-family:var(--fd);font-size:16px}
+  .selacts{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .selbtn{font-size:13px;font-weight:500;padding:8px 15px;border-radius:20px;border:1px solid var(--line-2);background:#fff;color:var(--ink);cursor:pointer;transition:.15s}
+  .selbtn:hover{border-color:var(--ink);background:var(--paper-2)}
+  .selbtn.acc{background:var(--fam);border-color:var(--fam);color:#04211f;font-weight:600}
+  .selbtn.acc:hover{background:var(--fam-deep);border-color:var(--fam-deep);color:#fff}
+
+  /* skip-while-queued in the batch feed */
+  .feed-skip{opacity:0;background:none;border:0;color:#8aa6b8;cursor:pointer;font-size:17px;line-height:1;padding:0 5px;border-radius:6px;flex:0 0 auto}
+  .feed-row:hover .feed-skip{opacity:1}
+  .feed-skip:hover{color:#f0a878;background:rgba(255,255,255,.06)}
+  .feed-row.searching .feed-skip,.feed-row.drafting .feed-skip,.feed-row.done .feed-skip,.feed-row.failed .feed-skip,.feed-row.thin .feed-skip,.feed-row.skipped .feed-skip{display:none}
+  .feed-row.skipped{opacity:.5} .feed-row.skipped .fd{background:#3a5468}
 
   /* ---------- modal ---------- */
   .modal-ov{position:fixed;inset:0;background:rgba(10,24,38,.55);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 18px;overflow:auto}
@@ -386,6 +413,15 @@
       <button class="resetlink" onclick="resetFilters()">Reset</button>
     </div>
 
+    <div class="selbar" id="selBar" hidden>
+      <span class="selcount"><b id="selN">0</b> selected for research</span>
+      <div class="selacts">
+        <button class="selbtn" onclick="selectAllShown()">Select all shown</button>
+        <button class="selbtn" onclick="clearSel()">Clear</button>
+        <button class="selbtn acc" onclick="openBatch()">✦ Research selected →</button>
+      </div>
+    </div>
+
     <div id="results"></div>
   </main>
 
@@ -540,7 +576,7 @@
     <div class="batch-body" id="batchConfig">
       <p class="batch-lead">Search the web for each company in your current filter, then draft a guarded, grounded call sheet for each — sequentially, so you stay within limits.</p>
       <div class="batch-fields">
-        <div class="bf"><span class="bf-lab">In current filter</span><span class="bf-val" id="batchAvail">0</span></div>
+        <div class="bf"><span class="bf-lab" id="batchAvailLab">In current filter</span><span class="bf-val" id="batchAvail">0</span></div>
         <div class="bf">
           <span class="bf-lab">Research how many</span>
           <input id="batchN" type="number" min="1" max="200" value="25" />
@@ -601,6 +637,7 @@ const CMS_ENDPOINTS=[
 ];
 
 let LABS=[], SHOWN=[], SEEN=new Map();   // dedupe key -> record, so merges stay O(1)
+let SEL=new Set();                       // ids the user hand-picked for research
 let PIPE=loadPipe();
 
 /* ---------------- storage ---------------- */
@@ -665,7 +702,7 @@ function afterLoad(){
   buildFilterOptions(); render();
   if(typeof updateDownloadState==='function') updateDownloadState();
 }
-function clearData(){ LABS=[]; SHOWN=[]; SEEN=new Map(); afterLoad(); log('Results cleared. Your pipeline notes are kept.'); }
+function clearData(){ LABS=[]; SHOWN=[]; SEEN=new Map(); SEL.clear(); updateSelBar(); afterLoad(); log('Results cleared. Your pipeline notes are kept.'); }
 
 /* ---------------- source A: CMS CLIA ---------------- */
 async function loadCMS(){
@@ -918,8 +955,10 @@ function rowHTML(l,idx){
     ? `<a class="btn-call" href="tel:+1${l.phone}">☎ Call ${fmtPhone(l.phone)}</a>`
     : `<a class="btn-look" href="https://www.google.com/search?q=${encodeURIComponent(l.name+' '+l.city+' '+l.state+' phone')}" target="_blank" rel="noopener">Find number ↗</a>`;
   const badges=l.sources.map(s=>`<span class="sbadge">${esc(s)}</span>`).join('');
-  return `<article class="jcard">
+  const on=SEL.has(l.id);
+  return `<article class="jcard${on?' sel':''}" onclick="cardClick(event,${idx})">
     <div class="jmain">
+      <button class="card-sel${on?' on':''}" onclick="toggleSel(event,${idx})" title="Select for research" aria-label="Select">${on?'✓':''}</button>
       <div class="jbadges">${badges}${l.cert?`<span class="certpill ${certClass(l.cert)}">${esc(l.cert)}</span>`:''}</div>
       <h3 class="jname">${esc(l.name)}</h3>
       <div class="jsub">${esc(l.extId||'')}</div>
@@ -1246,16 +1285,37 @@ function downloadBackup(){
   download('labline-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(data,null,2),'application/json');
 }
 
+/* ---- card selection ---- */
+function isInteractive(t){ return t.closest && t.closest('button,select,textarea,a,input'); }
+function cardClick(e,idx){ if(isInteractive(e.target)) return; setSel(idx,!SEL.has((SHOWN[idx]||{}).id)); }
+function toggleSel(e,idx){ e.stopPropagation(); setSel(idx,!SEL.has((SHOWN[idx]||{}).id)); }
+function setSel(idx,on){
+  const l=SHOWN[idx]; if(!l) return;
+  if(on) SEL.add(l.id); else SEL.delete(l.id);
+  const card=document.querySelectorAll('.cards .jcard')[idx];
+  if(card){ card.classList.toggle('sel',on); const s=card.querySelector('.card-sel'); if(s){ s.classList.toggle('on',on); s.textContent=on?'✓':''; } }
+  updateSelBar();
+}
+function selectAllShown(){ SHOWN.forEach(l=>SEL.add(l.id)); render(); updateSelBar(); }
+function clearSel(){ SEL.clear(); render(); updateSelBar(); }
+function updateSelBar(){
+  const bar=document.getElementById('selBar'); if(!bar) return;
+  bar.hidden=SEL.size===0; const n=document.getElementById('selN'); if(n) n.textContent=SEL.size;
+}
+
 /* ---- batch research & prep ---- */
 const RING_C=326.7;
 let BATCH={running:false,stop:false,pool:[],pool2:[],done:0,drafted:0,thin:0,failed:0,t0:0};
 function openBatch(){
   if(!LABS.length) return;
   if(BATCH.running){ reopenBatch(); return; }   // don't reset a run in progress
-  BATCH.pool=currentFilter();
+  const fromSel=SEL.size>0;
+  BATCH.pool=fromSel ? LABS.filter(l=>SEL.has(l.id)) : currentFilter();
   document.getElementById('batchAvail').textContent=BATCH.pool.length.toLocaleString();
+  document.getElementById('batchAvailLab').textContent=fromSel?'Hand-picked':'In current filter';
   const n=document.getElementById('batchN');
-  n.max=Math.min(200,BATCH.pool.length||1); n.value=Math.min(25,BATCH.pool.length||1);
+  n.max=Math.min(200,BATCH.pool.length||1);
+  n.value=Math.min(fromSel?BATCH.pool.length:25,200,BATCH.pool.length||1);
   const warn=document.getElementById('batchWarn');
   n.oninput=()=>{ const v=+n.value; if(v>50){ warn.hidden=false;
       warn.textContent='Large run: '+v+' companies, roughly '+Math.ceil(v*8/60)+'–'+Math.ceil(v*22/60)+' min and '+v+' searches of your quota.'; }
@@ -1289,7 +1349,9 @@ function updateDock(){
   if(BATCH.running){ g('dockTitle').textContent='Researching…'; g('dockSub').textContent=done+' / '+total; }
   else { g('dockTitle').textContent='Research done'; g('dockSub').textContent='view '+total+' results'; }
 }
-function feedRow(i,name){ return `<div class="feed-row queued" id="fr${i}"><span class="fd"></span><span class="fn">${esc(name)}</span><span class="fs" id="fs${i}">queued</span></div>`; }
+function feedRow(i,name){ return `<div class="feed-row queued" id="fr${i}"><span class="fd"></span><span class="fn">${esc(name)}</span><button class="feed-skip" title="Skip this one" onclick="skipRow(${i})">×</button><span class="fs" id="fs${i}">queued</span></div>`; }
+function skipRow(i){ const r=document.getElementById('fr'+i); if(!r||!r.classList.contains('queued')) return;
+  BATCH.skip.add(i); setRow(i,'skipped','skipped'); }
 function setRow(i,state,label){ const r=document.getElementById('fr'+i); if(!r)return;
   r.className='feed-row '+state+((state==='searching'||state==='drafting')?' active':'');
   const s=document.getElementById('fs'+i); if(s) s.textContent=label||state;
@@ -1310,7 +1372,7 @@ async function startBatch(){
   if(!c.endpoint||!c.model){ const m=document.getElementById('batchMsg'); m.className='batch-msg err'; m.textContent='Connect your local model first (AI settings).'; return; }
   const n=Math.max(1,Math.min(200,+document.getElementById('batchN').value||25));
   const pool=(BATCH.pool||[]).slice(0,n); if(!pool.length) return;
-  Object.assign(BATCH,{pool2:pool,running:true,stop:false,done:0,drafted:0,thin:0,failed:0,t0:Date.now()});
+  Object.assign(BATCH,{pool2:pool,running:true,stop:false,done:0,drafted:0,thin:0,failed:0,skipped:0,skip:new Set(),t0:Date.now()});
   document.getElementById('batchConfig').hidden=true;
   document.getElementById('batchProgress').hidden=false;
   document.getElementById('batchStartBtn').hidden=true;
@@ -1324,6 +1386,7 @@ async function startBatch(){
   let netFails=0;
   for(let i=0;i<pool.length;i++){
     if(BATCH.stop) break;
+    if(BATCH.skip.has(i)){ setRow(i,'skipped','skipped'); BATCH.skipped++; BATCH.done++; updRing(); continue; }
     const l=pool[i];
     try{
       const r=await draftForLead(l,'','',st=>setRow(i,st,st));
@@ -1348,13 +1411,14 @@ async function startBatch(){
   if(!document.getElementById('batchDock').hidden) updateDock();   // reflect done if minimized
   const m=document.getElementById('batchMsg');
   if(!m.textContent||m.className.indexOf('err')<0){ m.className='batch-msg ok';
-    m.textContent=BATCH.done+' processed · '+BATCH.drafted+' web-grounded · '+BATCH.thin+' offline · '+BATCH.failed+' failed'; }
+    m.textContent=(BATCH.done-BATCH.skipped)+' done · '+BATCH.drafted+' web · '+BATCH.thin+' offline'
+      +(BATCH.skipped?' · '+BATCH.skipped+' skipped':'')+(BATCH.failed?' · '+BATCH.failed+' failed':''); }
 }
 
 /* ---------------- init ---------------- */
 (function(){
   document.getElementById('gState').innerHTML=STATES.map(s=>`<option${s==='TX'?' selected':''}>${s}</option>`).join('');
-  updateLLMStatus(); updateResumeState(); updateDownloadState();
+  updateLLMStatus(); updateResumeState(); updateDownloadState(); updateSelBar();
   render();
 })();
 </script>
