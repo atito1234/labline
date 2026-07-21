@@ -536,7 +536,7 @@
   <div class="modal wide">
     <div class="m-head">
       <div><h2>Call prep</h2><p id="prepSub">AI-drafted talking points for this lab</p></div>
-      <button class="m-x" onclick="closeModal('mPrep')">×</button>
+      <button class="m-x" onclick="closePrep()">×</button>
     </div>
     <div class="m-body">
       <div class="prep-lead" id="prepLead"></div>
@@ -638,6 +638,7 @@ const CMS_ENDPOINTS=[
 
 let LABS=[], SHOWN=[], SEEN=new Map();   // dedupe key -> record, so merges stay O(1)
 let SEL=new Set();                       // ids the user hand-picked for research
+let PREPJOBS=new Set();                   // lead ids whose call sheet is generating (possibly in background)
 let PIPE=loadPipe();
 
 /* ---------------- storage ---------------- */
@@ -971,7 +972,7 @@ function rowHTML(l,idx){
           ${Object.entries(STATUS_LABELS).map(([v,t])=>`<option value="${v}"${p.status===v?' selected':''}>${t}</option>`).join('')}
         </select>
         ${call}
-        <button class="btn-prep${p.prep?' has':''}" type="button" onclick="openPrep(${idx})">⚡ ${p.prep?'Call sheet':'Prep'}</button>
+        <button class="btn-prep${p.prep?' has':''}" type="button" onclick="openPrep(${idx})">⚡ ${PREPJOBS.has(l.id)?'Prepping…':(p.prep?'Call sheet':'Prep')}</button>
         <button class="btn-note" type="button" onclick="toggleNote(this)">✎ Note</button>
       </div>
       <div class="jnote"${p.note?'':' hidden'}><textarea class="note" placeholder="Who you spoke to, next step…" onchange="setNote(${idx},this.value)">${esc(p.note)}</textarea></div>
@@ -1128,21 +1129,48 @@ async function fetchT(url,opts,ms){
   catch(e){ if(e.name==='AbortError') throw new Error('timed out — is your local model running and reachable?'); throw e; }
   finally{ clearTimeout(t); }
 }
-/* ---- LLM chat ---- */
-async function llmChat(messages){
+/* ---- LLM chat (streamed, with an IDLE timeout) ----
+   Slow local models are fine as long as tokens keep arriving. We only abort if the
+   model goes silent for IDLE_MS, instead of a fixed total-time cap that killed long drafts. */
+const IDLE_MS=90000;
+async function llmChat(messages,onDelta){
   const c=getLLM();
   if(!c.endpoint||!c.model) throw new Error('No local model set — open AI settings.');
-  if(c.format==='ollama'){
-    const res=await fetchT(c.endpoint+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:c.model,messages,stream:false})},180000);
-    if(!res.ok) throw new Error('model HTTP '+res.status);
-    const j=await res.json(); return (j.message&&j.message.content)||'';
-  } else {
-    const res=await fetchT(c.endpoint+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:c.model,messages,stream:false})},180000);
-    if(!res.ok) throw new Error('model HTTP '+res.status);
-    const j=await res.json(); return (j.choices&&j.choices[0]&&j.choices[0].message.content)||'';
-  }
+  const isOllama=c.format==='ollama';
+  const url=isOllama?c.endpoint+'/api/chat':c.endpoint+'/chat/completions';
+  const ac=new AbortController(); let idle;
+  const bump=()=>{ clearTimeout(idle); idle=setTimeout(()=>ac.abort(),IDLE_MS); };
+  bump();
+  let res;
+  try{
+    res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:c.model,messages,stream:true}),signal:ac.signal});
+  }catch(e){ clearTimeout(idle); if(e.name==='AbortError') throw new Error('no response — is the model running?'); throw e; }
+  if(!res.ok){ clearTimeout(idle); throw new Error('model HTTP '+res.status); }
+  if(!res.body){ clearTimeout(idle); const j=await res.json();   // no streaming support -> fall back
+    return isOllama?((j.message&&j.message.content)||''):((j.choices&&j.choices[0]&&j.choices[0].message.content)||''); }
+  const reader=res.body.getReader(), dec=new TextDecoder(); let buf='',out='';
+  try{
+    for(;;){
+      let chunk;
+      try{ chunk=await reader.read(); }
+      catch(e){ if(e.name==='AbortError') throw new Error(out?'stopped mid-draft (model went silent)':'timed out — model went silent'); throw e; }
+      if(chunk.done) break;
+      bump();
+      buf+=dec.decode(chunk.value,{stream:true});
+      let nl;
+      while((nl=buf.indexOf('\n'))>=0){
+        const line=buf.slice(0,nl).trim(); buf=buf.slice(nl+1);
+        if(!line) continue;
+        let piece='';
+        if(isOllama){ try{ const j=JSON.parse(line); piece=(j.message&&j.message.content)||''; }catch(e){} }
+        else if(line.startsWith('data:')){ const d=line.slice(5).trim(); if(d==='[DONE]') continue;
+          try{ const j=JSON.parse(d); piece=(j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content)||''; }catch(e){} }
+        if(piece){ out+=piece; if(onDelta) try{onDelta(out);}catch(e){} }
+      }
+    }
+  } finally { clearTimeout(idle); }
+  return out;
 }
 
 /* ---- per-lead call prep ---- */
@@ -1155,10 +1183,21 @@ function openPrep(idx){
     +` · ${esc(l.cert||'—')} · ${l.phone?fmtPhone(l.phone):'no phone on file'} · via ${esc((l.sources||[]).join(' / '))}`;
   document.getElementById('prepContact').value=p.contact||'';
   document.getElementById('prepCompany').value=p.company||'';
-  document.getElementById('prepOut').textContent=p.prep||'Fill in what you have, then Generate. Needs your local AI connected (AI settings).';
-  document.getElementById('prepMsg').textContent='';
+  const out=document.getElementById('prepOut'), btn=document.getElementById('prepGenBtn'), m=document.getElementById('prepMsg');
+  m.textContent='';
+  if(PREPJOBS.has(l.id)){ out.innerHTML='<span class="spin"></span>Drafting in the background… reopen anytime to check.'; btn.disabled=true; }
+  else { out.textContent=p.prep||'Fill in what you have, then Generate. Needs your local AI connected (AI settings).'; btn.disabled=false; }
   openModal('mPrep');
 }
+/* persist typed fields so nothing is lost when the modal closes */
+function persistPrepFields(){
+  if(!PREP_ID) return;
+  const p=PIPE[PREP_ID]=PIPE[PREP_ID]||{status:'new',note:''};
+  p.contact=document.getElementById('prepContact').value.trim();
+  p.company=document.getElementById('prepCompany').value.trim();
+  savePipe();
+}
+function closePrep(){ persistPrepFields(); closeModal('mPrep'); render(); }
 /* ---- web search (via a browser-reachable Search URL — the local proxy, ideally) ---- */
 function webEnabled(c){ c=c||getLLM(); return !!(c.searchOn && c.searchUrl); }
 async function webSearch(query,maxResults){
@@ -1171,7 +1210,7 @@ async function webSearch(query,maxResults){
   if(res.status===401||res.status===403) throw new Error('search rejected ('+res.status+') — check the key/URL');
   if(!res.ok) throw new Error('web search HTTP '+res.status);
   const j=await res.json();
-  return (j.results||[]).map(r=>({title:r.title||'',url:r.url||'',content:(r.content||'').slice(0,1200)}));
+  return (j.results||[]).slice(0,4).map(r=>({title:r.title||'',url:r.url||'',content:(r.content||'').slice(0,700)}));
 }
 
 function buildPrepMessages(l,companyText,contact,sources){
@@ -1206,30 +1245,35 @@ function buildPrepMessages(l,companyText,contact,sources){
     +"Write the call sheet, honoring the guardrails.";
   return [{role:'system',content:sys},{role:'user',content:usr}];
 }
-async function draftForLead(l,companyText,contact,onState){
+async function draftForLead(l,companyText,contact,onState,onDelta){
   let sources=[];
   const c=getLLM();
   if(webEnabled(c)){ if(onState)onState('searching'); sources=await webSearch(`${l.name} ${l.city} ${l.state} laboratory diagnostics biotech`,5); }
   if(onState)onState('drafting');
-  const text=await llmChat(buildPrepMessages(l,companyText,contact,sources));
+  const text=await llmChat(buildPrepMessages(l,companyText,contact,sources),onDelta);
   return {text,sources};
 }
 async function generatePrep(){
-  const l=SHOWN.find(x=>x.id===PREP_ID)||LABS.find(x=>x.id===PREP_ID); if(!l) return;
-  const btn=document.getElementById('prepGenBtn'), out=document.getElementById('prepOut');
-  btn.disabled=true; document.getElementById('prepMsg').textContent='';
-  const companyText=document.getElementById('prepCompany').value.trim();
-  const contact=document.getElementById('prepContact').value.trim();
+  const id=PREP_ID; const l=SHOWN.find(x=>x.id===id)||LABS.find(x=>x.id===id); if(!l) return;
+  if(PREPJOBS.has(id)) return;                       // already drafting this one
+  persistPrepFields();                               // save what was typed, first
+  const p=PIPE[id]||{}; const companyText=p.company||'', contact=p.contact||'';
+  const onThis=()=>PREP_ID===id&&document.getElementById('mPrep').classList.contains('open');
+  const out=()=>document.getElementById('prepOut');
+  PREPJOBS.add(id);
+  if(onThis()){ out().innerHTML='<span class="spin"></span>Working…'; document.getElementById('prepGenBtn').disabled=true; document.getElementById('prepMsg').textContent=''; }
+  render();                                          // card now shows "Prepping…"
   try{
-    const r=await draftForLead(l,companyText,contact,st=>{
-      out.innerHTML='<span class="spin"></span>'+(st==='searching'?'Searching the web for context…':'Drafting your call sheet…');
-    });
-    out.textContent=r.text||'(the model returned nothing — try a different model)';
-    if(r.sources.length) msg('prepMsg',r.sources.length+' web sources used','ok');
+    const r=await draftForLead(l,companyText,contact,
+      st=>{ if(onThis()) out().innerHTML='<span class="spin"></span>'+(st==='searching'?'Searching the web for context…':'Drafting your call sheet…'); },
+      txt=>{ if(onThis()) out().textContent=txt; });   // live tokens
+    const pp=PIPE[id]=PIPE[id]||{status:'new',note:''};
+    pp.prep=r.text||''; pp.prepAt=new Date().toISOString().slice(0,10);
+    savePipe();
+    if(onThis()){ out().textContent=r.text||'(the model returned nothing — try a different model)'; if(r.sources.length) msg('prepMsg',r.sources.length+' web sources used','ok'); }
   }catch(err){
-    out.textContent='Fill in what you have, then Generate.';
-    msg('prepMsg','Couldn’t generate: '+err.message,'err');
-  }finally{ btn.disabled=false; }
+    if(onThis()){ out().textContent=(PIPE[id]&&PIPE[id].prep)||'Fill in what you have, then Generate.'; msg('prepMsg','Couldn’t generate: '+err.message,'err'); }
+  }finally{ PREPJOBS.delete(id); if(onThis()) document.getElementById('prepGenBtn').disabled=false; render(); }
 }
 function savePrep(){
   const l=SHOWN.find(x=>x.id===PREP_ID)||LABS.find(x=>x.id===PREP_ID); if(!l) return;
@@ -1237,7 +1281,8 @@ function savePrep(){
   const p=PIPE[l.id]=PIPE[l.id]||{status:'new',note:''};
   p.contact=document.getElementById('prepContact').value.trim();
   p.company=document.getElementById('prepCompany').value.trim();
-  if(out && !out.startsWith('Fill in what you have')){ p.prep=out; p.prepAt=new Date().toISOString().slice(0,10); }
+  if(!PREPJOBS.has(l.id) && out && !out.startsWith('Fill in what you have') && !out.startsWith('Working') && !out.startsWith('Searching') && !out.startsWith('Drafting')){
+    p.prep=out; p.prepAt=new Date().toISOString().slice(0,10); }
   savePipe(); render(); closeModal('mPrep');
 }
 function msg(id,text,kind){ const el=document.getElementById(id); el.textContent=text; el.className='m-msg'+(kind?' '+kind:''); }
@@ -1396,10 +1441,14 @@ async function startBatch(){
       else { BATCH.thin++; setRow(i,'thin','no web'); }
       netFails=0;
     }catch(err){
-      BATCH.failed++; setRow(i,'failed',(err.message||'failed').slice(0,20));
-      if(/HTTP|rejected|Failed to fetch|timed out|NetworkError|Load failed/i.test(err.message||'')) netFails++;
+      const msgTxt=err.message||'';
+      BATCH.failed++; setRow(i,'failed',msgTxt.slice(0,22));
+      // Only a genuinely unreachable endpoint (proxy/Ollama down, CORS, bad key) trips the early stop.
+      // A slow-model timeout is NOT that — keep going.
+      const unreachable=/Failed to fetch|NetworkError|Load failed|ERR_|rejected|HTTP 4|HTTP 5/i.test(msgTxt) && !/timed out|went silent|no response/i.test(msgTxt);
+      netFails=unreachable?netFails+1:0;
       if(netFails>=3){ const m=document.getElementById('batchMsg'); m.className='batch-msg err';
-        m.textContent='Web search failed 3× — likely CORS or a bad key. Stopping. Test the key in AI settings, or switch to a local search source.'; BATCH.stop=true; }
+        m.textContent='Requests keep failing fast — the search proxy or Ollama looks unreachable. Check both are running and your Search URL, then retry.'; BATCH.stop=true; }
     }
     BATCH.done++; updRing(); savePipe();
     await new Promise(res=>setTimeout(res,350));

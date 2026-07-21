@@ -187,7 +187,15 @@ Keep the two windows it opens running while you work; close them to stop.
 
 **Research runs in the background.** During "Research & Prep" you can click *Run in background*
 (or just close the panel) to keep using LabLine while it works; a floating progress dock stays
-in the corner and reopens the panel when clicked.
+in the corner and reopens the panel when clicked. Single-lead "Prep" is the same — hit Generate,
+close the modal, and it finishes in the background (the card shows "Prepping…" and stores the
+sheet when done). Anything you type in the Prep panel is saved when you close it.
+
+**Model speed.** Responses stream token-by-token; a draft is only abandoned if the model goes
+silent for ~90s (not on a fixed total time), so slow models still finish. A big model like
+`llama3.1` can take minutes per company — for batch runs, a smaller/faster model (e.g.
+`llama3.2:3b`, `qwen2.5:3b`) is much quicker, and hand-picking a few leads beats researching
+hundreds.
 
 "Research & Prep" then runs research over your currently-filtered leads in a capped batch,
 sequentially, with a live progress panel and a Stop button. Search queries reach Ollama's
