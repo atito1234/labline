@@ -30,7 +30,7 @@ refresh cadence, and known gaps.
 No build step. No dependencies.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/labline.git
+git clone https://github.com/atito1234/labline.git
 cd labline
 python3 -m http.server 8000
 # open http://localhost:8000        -> landing page
