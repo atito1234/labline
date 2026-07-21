@@ -410,6 +410,7 @@
         <option value="followup">Follow up</option><option value="interview">Interview</option><option value="no">Not a fit</option>
       </select></span>
       <label class="phone-toggle"><input type="checkbox" id="onlyPhone" onchange="render()" /> Has phone</label>
+      <label class="phone-toggle"><input type="checkbox" id="onlyHC" onchange="render()" /> High-complexity</label>
       <button class="resetlink" onclick="resetFilters()">Reset</button>
     </div>
 
@@ -904,17 +905,19 @@ function buildFilterOptions(){
   fill('fCert',uniq(l=>[l.cert]),'All categories');
 }
 function resetFilters(){ ['q','fState','fSource','fCert','fStatus'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('onlyPhone').checked=false; render(); }
+  document.getElementById('onlyPhone').checked=false; document.getElementById('onlyHC').checked=false; render(); }
 function currentFilter(){
   const q=document.getElementById('q').value.trim().toLowerCase();
   const st=document.getElementById('fState').value, sr=document.getElementById('fSource').value;
   const ct=document.getElementById('fCert').value, stat=document.getElementById('fStatus').value;
   const onlyP=document.getElementById('onlyPhone').checked;
+  const onlyHC=document.getElementById('onlyHC').checked;
   return LABS.filter(l=>{
     if(st&&l.state!==st) return false;
     if(sr&&!l.sources.includes(sr)) return false;
     if(ct&&l.cert!==ct) return false;
     if(onlyP&&!l.phone) return false;
+    if(onlyHC){ const c=(l.cert||'').toLowerCase(); if(!(c.includes('compliance')||c.includes('accredit'))) return false; }
     if(stat){ const c=(PIPE[l.id]&&PIPE[l.id].status)||'new'; if(c!==stat) return false; }
     if(q&&!((l.name+' '+l.city+' '+l.extId).toLowerCase().includes(q))) return false;
     return true;
