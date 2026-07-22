@@ -8,3 +8,7 @@ node_modules/
 !docs/*.csv
 .vscode/
 .idea/
+
+# private, personal call-prep research (durable on disk, kept out of the public repo)
+data/research.json
+data/research.local.json

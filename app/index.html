@@ -430,6 +430,19 @@
   .jnext .next-in{border:1px solid var(--line)}
   .bc-next{display:flex;align-items:center;gap:8px}
   .bc-next .next-in{border:1px solid var(--line);background:#fff}
+
+  /* expandable research rows */
+  .rowexp{background:none;border:0;cursor:pointer;color:var(--muted-2);font-size:11px;padding:0 3px 0 0;vertical-align:middle}
+  .rowexp:hover{color:var(--fam-deep)}
+  .hasresearch{color:var(--fam-deep);font-size:10px}
+  .det-row td{background:var(--paper-2);padding:0;border-bottom:1px solid var(--line)}
+  .det{padding:16px 22px 18px 46px}
+  .det-h{font-family:var(--fm);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fam-deep);margin-bottom:10px}
+  .det-when{color:var(--muted-2);text-transform:none;letter-spacing:0}
+  .det-body{white-space:pre-wrap;font-size:13.5px;line-height:1.6;color:var(--ink-2);max-width:82ch}
+  .det-src{margin-top:12px;font-size:12px;color:var(--muted)}
+  .det-src a{color:var(--cy5);text-decoration:none;font-family:var(--fm)}
+  .det-src a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -788,6 +801,7 @@ let LABS=[], SHOWN=[], SEEN=new Map();   // dedupe key -> record, so merges stay
 let SEL=new Set();                       // ids the user hand-picked for research
 let PREPJOBS=new Set();                   // lead ids whose call sheet is generating (possibly in background)
 let VIEW='cards';                        // 'cards' | 'table' (monday-style board)
+let EXPANDED=new Set();                   // table row ids expanded to show research
 let PIPE=loadPipe();
 
 /* ---------------- storage ---------------- */
@@ -1161,7 +1175,17 @@ function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;
 function tableHTML(rows){
   return `<div class="tblwrap"><table class="board"><thead><tr>
     <th class="tsel"></th><th>Organisation</th><th>Location</th><th>Phone</th><th>Priority</th><th>Status</th><th>Contact / spoke with</th><th>Notes &amp; outcome</th><th>Next step</th><th>Last activity</th>
-  </tr></thead><tbody>${rows.map((l,i)=>trHTML(l,i)).join('')}</tbody></table></div>`;
+  </tr></thead><tbody>${rows.map((l,i)=>trHTML(l,i)+(EXPANDED.has(l.id)?detailRowHTML(l):'')).join('')}</tbody></table></div>`;
+}
+function toggleRow(i){ const l=SHOWN[i]; if(!l)return; if(EXPANDED.has(l.id)) EXPANDED.delete(l.id); else EXPANDED.add(l.id); render(); }
+function shortUrl(u){ try{ return new URL(u).hostname.replace(/^www\./,''); }catch(e){ return u; } }
+function detailRowHTML(l){
+  const p=PIPE[l.id]||{}; const prep=p.prep||''; const srcs=p.researchSources||[];
+  return `<tr class="det-row"><td class="det-cell" colspan="10"><div class="det">
+    <div class="det-h">◆ Research &amp; talking points${p.prepAt?` <span class="det-when">researched ${esc(p.prepAt)}</span>`:''}</div>
+    <div class="det-body">${prep?esc(prep):'<span class="tmuted">No research yet for this lab. Open ⚡ Prep to generate one (needs your local AI), or add it to data/research.json.</span>'}</div>
+    ${srcs.length?`<div class="det-src"><b>Sources:</b> ${srcs.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(shortUrl(u))}</a>`).join(' · ')}</div>`:''}
+  </div></td></tr>`;
 }
 function trHTML(l,i){
   const p=PIPE[l.id]||{status:'new',note:''};
@@ -1171,7 +1195,7 @@ function trHTML(l,i){
     : `<a class="tlook" href="https://www.google.com/search?q=${encodeURIComponent(l.name+' '+l.city+' '+l.state+' phone')}" target="_blank" rel="noopener">look up ↗</a>`;
   return `<tr class="${on?'sel':''}">
     <td class="tsel"><button class="card-sel${on?' on':''}" onclick="toggleSel(event,${i})" title="Select">${on?'✓':''}</button></td>
-    <td><div class="tname">${esc(l.name)}</div><div class="tid">${esc(l.extId||'')}</div><div class="tbadges">${l.sources.map(s=>`<span class="sbadge">${esc(s)}</span>`).join('')}${l.cert?`<span class="certpill ${certClass(l.cert)}">${esc(l.cert)}</span>`:''}</div></td>
+    <td><div class="tname"><button class="rowexp" onclick="toggleRow(${i});event.stopPropagation()" title="Show research">${EXPANDED.has(l.id)?'▾':'▸'}</button> ${esc(l.name)}${p.prep?' <span class="hasresearch" title="Research available">◆</span>':''}</div><div class="tid">${esc(l.extId||'')}</div><div class="tbadges">${l.sources.map(s=>`<span class="sbadge">${esc(s)}</span>`).join('')}${l.cert?`<span class="certpill ${certClass(l.cert)}">${esc(l.cert)}</span>`:''}</div></td>
     <td class="tloc">${esc(l.city)}${l.city&&l.state?', ':''}${esc(l.state)} ${esc(l.zip)}<div class="taddr">${esc(l.addr||'')}</div></td>
     <td>${tel}</td>
     <td>${prioSelectHTML('setPrio('+i+',this.value,this)',prioLevel(l.id,l))}</td>
@@ -1827,11 +1851,31 @@ async function startBatch(){
       +(BATCH.skipped?' · '+BATCH.skipped+' skipped':'')+(BATCH.failed?' · '+BATCH.failed+' failed':''); }
 }
 
+/* ---- durable research: auto-load prep from data/research.json (survives browser clears) ---- */
+async function loadResearch(){
+  try{
+    const res=await fetch('../data/research.json',{cache:'no-store'});
+    if(!res.ok) return;
+    const data=await res.json(); let n=0;
+    for(const e of (data.labs||[])){
+      if(!e.name) continue;
+      const id=dedupeKey({name:e.name,city:e.city||'',state:e.state||''});
+      const p=PIPE[id]=PIPE[id]||{status:'new',note:''};
+      if(!p.prep && e.prep){ p.prep=e.prep; p.prepAt=data.generated||''; p.researchSources=e.sources||[]; }
+      else if(e.sources && !p.researchSources){ p.researchSources=e.sources; }
+      if(!p.lab) p.lab={name:e.name,city:e.city||'',state:e.state||'',zip:e.zip||'',addr:'',phone:e.phone||'',cert:e.cert||'',extId:'',sources:['research']};
+      n++;
+    }
+    if(n){ savePipe(); render(); if(document.getElementById('log')) log('Loaded research for '+n+' labs from data/research.json','ok'); }
+  }catch(e){ /* no research file (e.g. the public site) — silently fine */ }
+}
+
 /* ---------------- init ---------------- */
 (function(){
   document.getElementById('gState').innerHTML=STATES.map(s=>`<option${s==='TX'?' selected':''}>${s}</option>`).join('');
   updateLLMStatus(); updateResumeState(); updateDownloadState(); updateSelBar(); updateActBadge();
   render();
+  loadResearch();
 })();
 </script>
 </body>
